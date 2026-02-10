@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل طلبة مادة الرياضيات</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- خلفية الرموز الرياضية -->
+    <div class="math-bg" id="mathBg"></div>
+
+    <div class="container">
+        <div class="registration-card">
+            <!-- رموز رياضية جانبية -->
+            <div class="corner-symbols">
+                <span class="corner-symbol top-left">∑</span>
+                <span class="corner-symbol top-right">∫</span>
+                <span class="corner-symbol bottom-left">π</span>
+                <span class="corner-symbol bottom-right">√</span>
+            </div>
+            
+            <!-- الهيدر -->
+            <div class="header">
+                <div class="logo-wrapper">
+                    <img src="logo.jpg" alt="Math Belghit Logo" class="main-logo">
+                </div>
+                
+                <!-- رموز رياضية زخرفية -->
+                <div class="math-decorations">
+                    <span class="math-symbol-decor">π</span>
+                    <span class="math-symbol-decor">∑</span>
+                    <span class="math-symbol-decor">∫</span>
+                    <span class="math-symbol-decor">√</span>
+                    <span class="math-symbol-decor">∞</span>
+                </div>
+                
+                <h1>تسجيل طلبة مادة الرياضيات</h1>
+                <p>MATH - BELGHIT</p>
+                
+                <!-- معادلة رياضية جميلة -->
+                <div class="math-equation">
+                    <span class="equation-text">E = mc²</span>
+                    <span class="equation-separator">|</span>
+                    <span class="equation-text">a² + b² = c²</span>
+                    <span class="equation-separator">|</span>
+                    <span class="equation-text">∫ f(x)dx</span>
+                </div>
+            </div>
+
+            <!-- نموذج التسجيل -->
+            <form id="registrationForm" novalidate>
+                <!-- الاسم -->
+                <div class="form-group">
+                    <label for="firstName">
+                        <span class="label-icon">📝</span>
+                        <span class="required">*</span>
+                        الاسم
+                    </label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="firstName" 
+                            name="firstName" 
+                            class="form-input" 
+                            placeholder="أدخل اسمك الأول"
+                            required
+                        >
+                        <div class="error-message" id="firstNameError">الرجاء إدخال الاسم</div>
+                    </div>
+                </div>
+
+                <!-- اللقب -->
+                <div class="form-group">
+                    <label for="lastName">
+                        <span class="label-icon">👤</span>
+                        <span class="required">*</span>
+                        اللقب
+                    </label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="lastName" 
+                            name="lastName" 
+                            class="form-input" 
+                            placeholder="أدخل لقبك"
+                            required
+                        >
+                        <div class="error-message" id="lastNameError">الرجاء إدخال اللقب</div>
+                    </div>
+                </div>
+
+                <!-- القسم -->
+                <div class="form-group">
+                    <label for="class">
+                        <span class="label-icon">🎓</span>
+                        <span class="required">*</span>
+                        القسم
+                    </label>
+                    <div class="input-wrapper">
+                        <select 
+                            id="class" 
+                            name="class" 
+                            class="form-input"
+                            required
+                        >
+                            <option value="" disabled selected>اختر قسمك</option>
+                            <option value="السنة الأولى ثانوي">السنة الأولى ثانوي</option>
+                            <option value="السنة الثانية ثانوي">السنة الثانية ثانوي</option>
+                            <option value="السنة الثالثة ثانوي - علوم تجريبية">السنة الثالثة ثانوي - علوم تجريبية</option>
+                            <option value="السنة الثالثة ثانوي - رياضيات">السنة الثالثة ثانوي - رياضيات</option>
+                            <option value="السنة الثالثة ثانوي - تقني رياضي">السنة الثالثة ثانوي - تقني رياضي</option>
+                            <option value="السنة الثالثة ثانوي - تسيير واقتصاد">السنة الثالثة ثانوي - تسيير واقتصاد</option>
+                        </select>
+                        <div class="error-message" id="classError">الرجاء اختيار القسم</div>
+                    </div>
+                </div>
+
+                <!-- رقم الهاتف -->
+                <div class="form-group">
+                    <label for="phone">
+                        <span class="label-icon">📱</span>
+                        رقم الهاتف
+                        <span class="optional">(اختياري)</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone" 
+                            class="form-input" 
+                            placeholder="مثال: 0555123456"
+                            pattern="^(0)(5|6|7)[0-9]{8}$"
+                        >
+                        <div class="error-message" id="phoneError">رقم الهاتف غير صحيح (يجب أن يبدأ بـ 05, 06, أو 07)</div>
+                    </div>
+                </div>
+
+                <!-- زر الإرسال -->
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span class="btn-text">✓ تسجيل الآن</span>
+                    <div class="btn-loader">
+                        <div class="spinner"></div>
+                    </div>
+                </button>
+            </form>
+
+            <!-- رسالة النجاح -->
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">✓</div>
+                <div>تم التسجيل بنجاح!</div>
+                <p style="font-size: 14px; margin-top: 8px; opacity: 0.9;">شكراً لتسجيلك في مادة الرياضيات 📐📊</p>
+                <div class="success-math-symbols">
+                    <span>∑</span>
+                    <span>π</span>
+                    <span>∫</span>
+                </div>
+            </div>
+
+            <!-- تذييل النموذج -->
+            <div class="form-footer">
+                <p>جميع البيانات محمية وسرية 🔒</p>
+                <div class="footer-branding">
+                    <span class="brand-text">MATH - BELGHIT</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
