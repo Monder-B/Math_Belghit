@@ -192,24 +192,31 @@ async function sendQrToServer(qrToken) {
 }
 
 // دالة معالجة نجاح المسح
-function onScanSuccess(decodedText, decodedResult) {
-    if (scanLockout) {
-        console.log('Scan locked out, ignoring...');
-        return;
-    }
-    
-    // قفل المسح لمدة 2 ثانية
+async function onScanSuccess(decodedText) {
+    if (scanLockout) return;
     scanLockout = true;
-    
-    console.log('QR scanned:', decodedText);
-    
-    // إرسال إلى الخادم
-    sendQrToServer(decodedText);
-    
-    // فك القفل بعد 2 ثانية
-    setTimeout(() => {
-        scanLockout = false;
-    }, 2000);
+
+    try {
+        const code = String(decodedText).trim();
+
+        // 1) نجيب qrToken من السيرفر باستعمال studentCode
+        const sRes = await fetch(`${WORKER_BASE}/student?code=${encodeURIComponent(code)}`);
+        const sData = await sRes.json();
+
+        if (!sRes.ok || !sData.ok) {
+            throw new Error(sData.error || "Student not found");
+        }
+
+        // 2) نسجل الحضور باستعمال qrToken + PIN
+        await sendQrToServer(sData.qrToken);
+
+    } catch (e) {
+        showScanError(e.message);
+    } finally {
+        setTimeout(() => {
+            scanLockout = false;
+        }, 1500);
+    }
 }
 
 // دالة معالجة خطأ المسح
@@ -228,8 +235,8 @@ async function startScanning() {
         }
         
         const config = {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
+            fps: 8,
+            qrbox: { width: 320, height: 320 },
             aspectRatio: 1.0
         };
         

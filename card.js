@@ -68,20 +68,20 @@ function displayStudentCard(data) {
     document.getElementById('studentCode').textContent = data.studentCode || '----';
     
     // إنشاء QR Code
-    if (!data.qrToken) {
-  showError('QR غير متوفر', 'لم يتم استلام qrToken من الخادم. تأكد أن Endpoint /student يرجع qrToken.');
-      return;
+    if (!data.studentCode) {
+    showError('كود غير متوفر', 'لم يتم استلام studentCode من الخادم.');
+    return;
     }
-    generateQRCode(data.qrToken);
+    generateQRCode(data.studentCode);
     
     // (اختياري) عرض الحالة
-  const statusBox = document.getElementById('statusBox');
-  if (statusBox && typeof data.sessionsInCycle === "number") {
-  statusBox.innerHTML = `
-    ✅ حضرت: <b>${data.sessionsInCycle}</b> |
-    💰 باقي للدفع: <b>${data.remainingToPay}</b> |
-    ⛔ باقي للحد الأقصى: <b>${data.remainingToMax}</b>
-  `;
+    const statusBox = document.getElementById('statusBox');
+    if (statusBox && typeof data.sessionsInCycle === "number") {
+    statusBox.innerHTML = `
+        ✅ حضرت: <b>${data.sessionsInCycle}</b> |
+        💰 باقي للدفع: <b>${data.remainingToPay}</b> |
+        ⛔ باقي للحد الأقصى: <b>${data.remainingToMax}</b>
+    `;
 }
     
     // إخفاء Loader وعرض البطاقة
@@ -91,26 +91,26 @@ function displayStudentCard(data) {
 }
 
 // دالة جلب بيانات الطالب من API
-async function fetchStudentData(code) {
-  try {
-    const response = await fetch(`${WORKER_BASE}/student?code=${encodeURIComponent(code)}`);
-    const data = await response.json();
+    async function fetchStudentData(code) {
+    try {
+        const response = await fetch(`${WORKER_BASE}/student?code=${encodeURIComponent(code)}`);
+        const data = await response.json();
 
-    if (!response.ok) {
-      showError('خطأ من الخادم', data.error || `HTTP ${response.status}`);
-      return;
-    }
+        if (!response.ok) {
+        showError('خطأ من الخادم', data.error || `HTTP ${response.status}`);
+        return;
+        }
 
-    if (data.ok) {
-      displayStudentCard(data);
-    } else {
-      showError('بيانات غير صحيحة', data.error || 'لم يتم العثور على الطالب بهذا الكود');
+        if (data.ok) {
+        displayStudentCard(data);
+        } else {
+        showError('بيانات غير صحيحة', data.error || 'لم يتم العثور على الطالب بهذا الكود');
+        }
+    } catch (error) {
+        console.error('خطأ في جلب البيانات:', error);
+        showError('خطأ في الاتصال', 'تعذر الاتصال بالخادم. تحقق من الاتصال بالإنترنت وحاول مرة أخرى.');
     }
-  } catch (error) {
-    console.error('خطأ في جلب البيانات:', error);
-    showError('خطأ في الاتصال', 'تعذر الاتصال بالخادم. تحقق من الاتصال بالإنترنت وحاول مرة أخرى.');
-  }
-}
+    }
 
 // زر نسخ الكود
 document.getElementById('copyCodeBtn').addEventListener('click', async () => {
