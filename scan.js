@@ -1,6 +1,7 @@
 // إنشاء خلفية الرموز الرياضية (نفس script.js)
 const mathSymbols = ['π', '∑', '∫', '√', '∞', 'α', 'β', 'θ', '≈', '≠', '≤', '≥', 'Δ', 'φ', 'λ', 'Ω'];
 const mathBg = document.getElementById('mathBg');
+const tokenCache = new Map(); // كاش بسيط لتخزين qrToken حسب الكود
 
 function createMathSymbols() {
     for (let i = 0; i < 25; i++) {
@@ -192,73 +193,103 @@ async function sendQrToServer(qrToken) {
 }
 
 // دالة معالجة نجاح المسح
-async function onScanSuccess(decodedText) {
+    async function onScanSuccess(decodedText) {
     if (scanLockout) return;
     scanLockout = true;
-
     try {
-        const code = String(decodedText).trim();
-
-        // 1) نجيب qrToken من السيرفر باستعمال studentCode
-        const sRes = await fetch(`${WORKER_BASE}/student?code=${encodeURIComponent(code)}`);
-        const sData = await sRes.json();
-
+        const code = String(decodedText ?? "").trim();
+        if (!code) throw new Error("QR فارغ");
+        // ✅ 1) حاول نجيب qrToken من الكاش (أسرع)
+        let qrToken = tokenCache.get(code);
+        // ✅ 2) إذا ماكانش، نجيبو من السيرفر مرة وحدة ونخزنو
+        if (!qrToken) {
+        const sRes = await fetch(`${WORKER_BASE}/student?code=${encodeURIComponent(code)}`, {
+            method: "GET",
+            cache: "no-store",
+        });
+        const sData = await sRes.json().catch(() => ({}));
         if (!sRes.ok || !sData.ok) {
-            throw new Error(sData.error || "Student not found");
+            throw new Error(sData.error || `Student not found (HTTP ${sRes.status})`);
         }
-
-        // 2) نسجل الحضور باستعمال qrToken + PIN
-        await sendQrToServer(sData.qrToken);
-
+        if (!sData.qrToken) {
+            throw new Error("qrToken غير متوفر في رد /student");
+        }
+        qrToken = String(sData.qrToken).trim();
+        tokenCache.set(code, qrToken); // ✅ تخزين للكود القادم
+        }
+        // ✅ 3) نسجل الحضور باستعمال qrToken + PIN
+        await sendQrToServer(qrToken);
     } catch (e) {
-        showScanError(e.message);
+        showScanError(e.message || "حدث خطأ أثناء المسح");
     } finally {
         setTimeout(() => {
-            scanLockout = false;
-        }, 1500);
+        scanLockout = false;
+        }, 700);
     }
-    console.log("SCANNED:", decodedText);alert(decodedText);
-}
+    }
 
 // دالة معالجة خطأ المسح
-function onScanError(errorMessage) {
-    // تجاهل أخطاء "No QR code found" العادية
-    // console.log('Scan error:', errorMessage);
-}
+// ✅ دالة معالجة خطأ المسح (محسّنة للأداء)
+    let lastRealErrorAt = 0;
+
+    function onScanError(errorMessage) {
+    const msg = String(errorMessage || "").toLowerCase();
+
+    const isNormalNoise =
+        msg.includes("no qr code found") ||
+        msg.includes("notfoundexception") ||
+        msg.includes("not found") ||
+        msg.includes("no code detected") ||
+        msg.includes("no multi format readers");
+
+    if (isNormalNoise) return;
+
+    const now = Date.now();
+    if (now - lastRealErrorAt < 2000) return;
+    lastRealErrorAt = now;
+
+    console.warn("Scan real error:", errorMessage);
+    showScanError("خطأ في المسح: " + errorMessage);
+    }
 
 // دالة بدء المسح
-async function startScanning() {
+    async function startScanning() {
     if (isScanning) return;
-    
+
     try {
         if (!html5QrCode) {
-            html5QrCode = new Html5Qrcode("qr-reader");
+        html5QrCode = new Html5Qrcode("qr-reader");
         }
-        
+        // ✅ إعدادات أسرع و أخف على الهاتف
         const config = {
-            fps: 8,
-            qrbox: { width: 320, height: 320 },
-            aspectRatio: 1.0
+        fps: 14, // أفضل توازن للسرعة والثبات
+        qrbox: { width: 240, height: 240 }, // أصغر = قراءة أسرع
+        aspectRatio: 1.0,
+        disableFlip: true,
+        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
         };
-        
+        // ✅ تحسين جودة الفيديو (يساعد بزاف في القراءة)
+        const cameraConfig = {
+        facingMode: "environment",
+        // إذا الجهاز يدعمها، تعطي صورة أوضح للـ QR
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        };
         await html5QrCode.start(
-            { facingMode: "environment" },
-            config,
-            onScanSuccess,
-            onScanError
+        cameraConfig,
+        config,
+        onScanSuccess,
+        onScanError
         );
-        
         isScanning = true;
-        startScanBtn.style.display = 'none';
-        stopScanBtn.style.display = 'block';
-        scanError.style.display = 'none';
-        
+        startScanBtn.style.display = "none";
+        stopScanBtn.style.display = "block";
+        scanError.style.display = "none";
     } catch (error) {
-        console.error('خطأ في تشغيل الكاميرا:', error);
-        showScanError('فشل تشغيل الكاميرا. تأكد من السماح بالوصول إلى الكاميرا.');
+        console.error("خطأ في تشغيل الكاميرا:", error);
+        showScanError("فشل تشغيل الكاميرا. تأكد من السماح بالوصول إلى الكاميرا.");
     }
-}
-
+    }
 // دالة إيقاف المسح
 async function stopScanning() {
     if (!isScanning || !html5QrCode) return;
