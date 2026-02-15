@@ -16,7 +16,9 @@
     '/Math_Belghit/logo.jpg',
     '/Math_Belghit/manifest.json',
     '/Math_Belghit/icons/icon-192.png',
-    '/Math_Belghit/icons/icon-512.png'
+    '/Math_Belghit/icons/icon-512.png',
+    '/Math_Belghit/beep.mp3',
+
 ];
     // التثبيت - تخزين الملفات الأساسية
     self.addEventListener('install', (event) => {

@@ -1,9 +1,12 @@
-// إنشاء خلفية الرموز الرياضية (نفس script.js)
-const mathSymbols = ['π', '∑', '∫', '√', '∞', 'α', 'β', 'θ', '≈', '≠', '≤', '≥', 'Δ', 'φ', 'λ', 'Ω'];
-const mathBg = document.getElementById('mathBg');
-const tokenCache = new Map(); // كاش بسيط لتخزين qrToken حسب الكود
+    // =====================
+    // خلفية الرموز الرياضية
+    // =====================
+    const mathSymbols = ['π', '∑', '∫', '√', '∞', 'α', 'β', 'θ', '≈', '≠', '≤', '≥', 'Δ', 'φ', 'λ', 'Ω'];
+    const mathBg = document.getElementById('mathBg');
+    const tokenCache = new Map(); // كاش qrToken حسب studentCode
 
-function createMathSymbols() {
+    function createMathSymbols() {
+    if (!mathBg) return;
     for (let i = 0; i < 25; i++) {
         const symbol = document.createElement('div');
         symbol.className = 'math-symbol';
@@ -14,145 +17,152 @@ function createMathSymbols() {
         symbol.style.fontSize = (Math.random() * 2 + 1) + 'rem';
         mathBg.appendChild(symbol);
     }
-}
-
-createMathSymbols();
-
-// متغيرات عامة
-const WORKER_BASE = "https://long-mud-24f2.mmondeer346.workers.dev";
-const PIN_STORAGE_KEY = "teacher_pin";
-const PIN_EXPIRY_KEY = "teacher_pin_expiry";
-const PIN_EXPIRY_HOURS = 8;
-
-let html5QrCode = null;
-let currentPin = null;
-let isScanning = false;
-let scanLockout = false;
-
-// العناصر
-const pinSection = document.getElementById('pinSection');
-const scannerSection = document.getElementById('scannerSection');
-const pinInput = document.getElementById('pinInput');
-const pinSubmitBtn = document.getElementById('pinSubmitBtn');
-const pinError = document.getElementById('pinError');
-const startScanBtn = document.getElementById('startScanBtn');
-const stopScanBtn = document.getElementById('stopScanBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const resultBox = document.getElementById('resultBox');
-const resultIcon = document.getElementById('resultIcon');
-const resultTitle = document.getElementById('resultTitle');
-const resultDetails = document.getElementById('resultDetails');
-const scanError = document.getElementById('scanError');
-
-// دالة فحص PIN المخزن
-function checkStoredPin() {
-    const storedPin = localStorage.getItem(PIN_STORAGE_KEY);
-    const expiry = localStorage.getItem(PIN_EXPIRY_KEY);
-    
-    if (storedPin && expiry) {
-        const expiryTime = parseInt(expiry);
-        const now = Date.now();
-        
-        if (now < expiryTime) {
-            currentPin = storedPin;
-            showScannerSection();
-            return true;
-        } else {
-            localStorage.removeItem(PIN_STORAGE_KEY);
-            localStorage.removeItem(PIN_EXPIRY_KEY);
-        }
     }
-    
-    return false;
-}
+    createMathSymbols();
 
+    // =====================
+    // إعدادات عامة
+    // =====================
+    const WORKER_BASE = "https://long-mud-24f2.mmondeer346.workers.dev";
 
-    // 🔊 صوت باركود قوي
+    const PIN_STORAGE_KEY = "teacher_pin";
+    const PIN_EXPIRY_KEY = "teacher_pin_expiry";
+    const PIN_EXPIRY_HOURS = 8;
+
+    let html5QrCode = null;
+    let currentPin = null;
+    let isScanning = false;
+    let scanLockout = false;
+
+    // =====================
+    // عناصر DOM
+    // =====================
+    const pinSection = document.getElementById('pinSection');
+    const scannerSection = document.getElementById('scannerSection');
+    const pinInput = document.getElementById('pinInput');
+    const pinSubmitBtn = document.getElementById('pinSubmitBtn');
+    const pinError = document.getElementById('pinError');
+    const startScanBtn = document.getElementById('startScanBtn');
+    const stopScanBtn = document.getElementById('stopScanBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    const resultBox = document.getElementById('resultBox');
+    const resultIcon = document.getElementById('resultIcon');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultDetails = document.getElementById('resultDetails');
+    const scanError = document.getElementById('scanError');
+
+    // =====================
+    // 🔊 صوت + تأثير ضوئي
+    // =====================
+    // مهم: لازم ملف beep.mp3 يكون فعلاً داخل /Math_Belghit/
     const scannerBeep = new Audio('/Math_Belghit/beep.mp3');
     scannerBeep.preload = "auto";
     scannerBeep.volume = 1.0;
 
-    // ⚡ تأثير ضوئي (وميض)
+    // وميض CSS: لازم تضيف .scan-flash في scan.css
     function flashEffect() {
     document.body.classList.add('scan-flash');
     setTimeout(() => document.body.classList.remove('scan-flash'), 120);
     }
 
-    // 🔦 تشغيل فلاش الكاميرا (إن كان مدعوم)
+    // محاولة تشغيل torch إن كان مدعوم (بدون ما يطيح)
     async function torchBlink(durationMs = 120) {
     try {
         if (!html5QrCode) return;
-        const cam = html5QrCode.getRunningTrack?.();
-        if (!cam) return;
 
-        const cap = cam.getCapabilities?.();
+        // بعض نسخ html5-qrcode فيها getRunningTrack
+        const track = typeof html5QrCode.getRunningTrack === "function"
+        ? html5QrCode.getRunningTrack()
+        : null;
+
+        if (!track) return;
+
+        const cap = track.getCapabilities?.();
         if (!cap || !cap.torch) return;
 
-        await cam.applyConstraints({ advanced: [{ torch: true }] });
+        await track.applyConstraints({ advanced: [{ torch: true }] });
         setTimeout(async () => {
-        try { await cam.applyConstraints({ advanced: [{ torch: false }] }); } catch {}
+        try { await track.applyConstraints({ advanced: [{ torch: false }] }); } catch {}
         }, durationMs);
     } catch {
-        // بعض الأجهزة تمنع torch
+        // تجاهل
     }
     }
 
-// دالة حفظ PIN
-function storePin(pin) {
+    // =====================
+    // PIN storage
+    // =====================
+    function checkStoredPin() {
+    const storedPin = localStorage.getItem(PIN_STORAGE_KEY);
+    const expiry = localStorage.getItem(PIN_EXPIRY_KEY);
+
+    if (storedPin && expiry) {
+        const expiryTime = parseInt(expiry, 10);
+        if (Date.now() < expiryTime) {
+        currentPin = storedPin;
+        showScannerSection();
+        return true;
+        }
+        localStorage.removeItem(PIN_STORAGE_KEY);
+        localStorage.removeItem(PIN_EXPIRY_KEY);
+    }
+    return false;
+    }
+
+    function storePin(pin) {
     const expiry = Date.now() + (PIN_EXPIRY_HOURS * 60 * 60 * 1000);
     localStorage.setItem(PIN_STORAGE_KEY, pin);
-    localStorage.setItem(PIN_EXPIRY_KEY, expiry.toString());
+    localStorage.setItem(PIN_EXPIRY_KEY, String(expiry));
     currentPin = pin;
-}
+    }
 
-// دالة حذف PIN
-function clearStoredPin() {
+    function clearStoredPin() {
     localStorage.removeItem(PIN_STORAGE_KEY);
     localStorage.removeItem(PIN_EXPIRY_KEY);
     currentPin = null;
-}
+    }
 
-// دالة عرض خطأ PIN
-function showPinError(message) {
+    // =====================
+    // UI helpers
+    // =====================
+    function showPinError(message) {
     pinError.textContent = message;
     pinError.classList.add('show');
     pinInput.classList.add('error');
-}
-
-// دالة إخفاء خطأ PIN
-function hidePinError() {
+    }
+    function hidePinError() {
     pinError.textContent = '';
     pinError.classList.remove('show');
     pinInput.classList.remove('error');
-}
+    }
 
-// دالة عرض قسم الماسح
-function showScannerSection() {
+    function showScannerSection() {
     pinSection.style.display = 'none';
     scannerSection.style.display = 'block';
-}
-
-// دالة عرض قسم PIN
-function showPinSection() {
+    }
+    function showPinSection() {
     scannerSection.style.display = 'none';
     pinSection.style.display = 'block';
     pinInput.value = '';
     hidePinError();
-}
+    }
 
-// دالة عرض رسالة خطأ عامة
-function showScanError(message) {
+    function showScanError(message) {
     scanError.textContent = message;
     scanError.style.display = 'block';
+    // باش تشوفها دايماً حتى لو كانت تحت
+    scanError.scrollIntoView({ behavior: "smooth", block: "center" });
+
     setTimeout(() => {
         scanError.style.display = 'none';
-    }, 5000);
-}
+    }, 4500);
+    }
 
-// دالة عرض النتيجة
-function showResult(data) {
-
-        // ✅ صوت + فلاش
+    // =====================
+    // عرض النتيجة + صوت/فلاش
+    // =====================
+    function showResult(data) {
     try {
         scannerBeep.currentTime = 0;
         scannerBeep.play();
@@ -160,12 +170,11 @@ function showResult(data) {
 
     flashEffect();
     torchBlink(120);
+    if (navigator.vibrate) navigator.vibrate([70, 40, 70]);
 
-    // 📳 اهتزاز قوي (تأثير جهاز)
-    if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
     resultBox.style.display = 'block';
-    
-    // تحديد اللون والأيقونة حسب الحالة
+    resultBox.scrollIntoView({ behavior: "smooth", block: "center" });
+
     if (data.state === 'ok') {
         resultBox.className = 'result-box success';
         resultIcon.textContent = '✅';
@@ -178,114 +187,98 @@ function showResult(data) {
         resultBox.className = 'result-box error';
         resultIcon.textContent = '🚫';
         resultTitle.textContent = 'موقوف: وصل 8 حصص';
+    } else {
+        resultBox.className = 'result-box success';
+        resultIcon.textContent = '✅';
+        resultTitle.textContent = 'تم تسجيل الحصة';
     }
-    
-    // عرض التفاصيل
+
     resultDetails.innerHTML = `
         <div class="result-row">
-            <span class="result-label">✅ حضر:</span>
-            <span class="result-value">${data.sessionsInCycle}</span>
+        <span class="result-label">✅ حضر:</span>
+        <span class="result-value">${data.sessionsInCycle}</span>
         </div>
         <div class="result-row">
-            <span class="result-label">💰 المتبقي للدفع:</span>
-            <span class="result-value">${data.remainingToPay}</span>
+        <span class="result-label">💰 المتبقي للدفع:</span>
+        <span class="result-value">${data.remainingToPay}</span>
         </div>
         <div class="result-row">
-            <span class="result-label">⛔ المتبقي للحد الأقصى:</span>
-            <span class="result-value">${data.remainingToMax}</span>
+        <span class="result-label">⛔ المتبقي للحد الأقصى:</span>
+        <span class="result-value">${data.remainingToMax}</span>
         </div>
     `;
-    
+
     if (data.state === 'due_at_4') {
         resultDetails.innerHTML += '<div class="result-message">يجب الدفع قبل الحصة القادمة</div>';
     } else if (data.state === 'suspended') {
         resultDetails.innerHTML += '<div class="result-message">الطالب موقوف حتى الدفع</div>';
     }
-    
-    // إخفاء النتيجة بعد 5 ثواني
+
     setTimeout(() => {
         resultBox.style.display = 'none';
-    }, 5000);
-}
-
-// دالة إرسال QR إلى الخادم
-async function sendQrToServer(qrToken) {
-    try {
-        const response = await fetch(`${WORKER_BASE}/scan`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                qrToken: qrToken,
-                pin: currentPin
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok || !data.ok) {
-            throw new Error(data.error || 'فشل تسجيل الحضور');
-        }
-        
-        // عرض النتيجة
-        showResult(data);
-        
-    } catch (error) {
-        console.error('خطأ في إرسال QR:', error);
-        showScanError('خطأ: ' + error.message);
+    }, 2500);
     }
-}
 
-// دالة معالجة نجاح المسح
+    // =====================
+    // API calls
+    // =====================
+    async function sendQrToServer(qrToken) {
+    const response = await fetch(`${WORKER_BASE}/scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrToken, pin: currentPin }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) throw new Error(data.error || 'فشل تسجيل الحضور');
+    showResult(data);
+    }
+
     async function onScanSuccess(decodedText) {
     if (scanLockout) return;
     scanLockout = true;
+
     try {
         const code = String(decodedText ?? "").trim();
         if (!code) throw new Error("QR فارغ");
-        // ✅ 1) حاول نجيب qrToken من الكاش (أسرع)
+
+        // ✅ كاش للسرعة
         let qrToken = tokenCache.get(code);
-        // ✅ 2) إذا ماكانش، نجيبو من السيرفر مرة وحدة ونخزنو
+
         if (!qrToken) {
         const sRes = await fetch(`${WORKER_BASE}/student?code=${encodeURIComponent(code)}`, {
             method: "GET",
             cache: "no-store",
         });
+
         const sData = await sRes.json().catch(() => ({}));
-        if (!sRes.ok || !sData.ok) {
-            throw new Error(sData.error || `Student not found (HTTP ${sRes.status})`);
-        }
-        if (!sData.qrToken) {
-            throw new Error("qrToken غير متوفر في رد /student");
-        }
+        if (!sRes.ok || !sData.ok) throw new Error(sData.error || `Student not found (HTTP ${sRes.status})`);
+        if (!sData.qrToken) throw new Error("qrToken غير متوفر في رد /student");
+
         qrToken = String(sData.qrToken).trim();
-        tokenCache.set(code, qrToken); // ✅ تخزين للكود القادم
+        tokenCache.set(code, qrToken);
         }
-        // ✅ 3) نسجل الحضور باستعمال qrToken + PIN
+
         await sendQrToServer(qrToken);
     } catch (e) {
         showScanError(e.message || "حدث خطأ أثناء المسح");
     } finally {
-        setTimeout(() => {
-        scanLockout = false;
-        }, 700);
+        setTimeout(() => (scanLockout = false), 650);
     }
     }
 
-// دالة معالجة خطأ المسح
-// ✅ دالة معالجة خطأ المسح (محسّنة للأداء)
+    // ✅ onScanError محسّن
     let lastRealErrorAt = 0;
-
     function onScanError(errorMessage) {
     const msg = String(errorMessage || "").toLowerCase();
-
-    const isNormalNoise =
+    const isNoise =
         msg.includes("no qr code found") ||
         msg.includes("notfoundexception") ||
         msg.includes("not found") ||
         msg.includes("no code detected") ||
         msg.includes("no multi format readers");
 
-    if (isNormalNoise) return;
+    if (isNoise) return;
 
     const now = Date.now();
     if (now - lastRealErrorAt < 2000) return;
@@ -295,147 +288,111 @@ async function sendQrToServer(qrToken) {
     showScanError("خطأ في المسح: " + errorMessage);
     }
 
-// دالة بدء المسح
+    // =====================
+    // تشغيل / إيقاف الكاميرا
+    // =====================
     async function startScanning() {
     if (isScanning) return;
 
     try {
-        if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("qr-reader");
-        }
-        // ✅ إعدادات أسرع و أخف على الهاتف
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
+
         const config = {
-        fps: 14, // أفضل توازن للسرعة والثبات
-        qrbox: { width: 240, height: 240 }, // أصغر = قراءة أسرع
+        fps: 14,
+        qrbox: { width: 240, height: 240 },
         aspectRatio: 1.0,
         disableFlip: true,
         experimentalFeatures: { useBarCodeDetectorIfSupported: true },
         };
-        // ✅ تحسين جودة الفيديو (يساعد بزاف في القراءة)
+
         const cameraConfig = {
         facingMode: "environment",
-        // إذا الجهاز يدعمها، تعطي صورة أوضح للـ QR
         width: { ideal: 1280 },
         height: { ideal: 720 },
         };
-        await html5QrCode.start(
-        cameraConfig,
-        config,
-        onScanSuccess,
-        onScanError
-        );
+
+        await html5QrCode.start(cameraConfig, config, onScanSuccess, onScanError);
+
         isScanning = true;
         startScanBtn.style.display = "none";
         stopScanBtn.style.display = "block";
         scanError.style.display = "none";
     } catch (error) {
-        console.error("خطأ في تشغيل الكاميرا:", error);
+        console.error("Camera start error:", error);
         showScanError("فشل تشغيل الكاميرا. تأكد من السماح بالوصول إلى الكاميرا.");
     }
     }
-// دالة إيقاف المسح
-async function stopScanning() {
+
+    async function stopScanning() {
     if (!isScanning || !html5QrCode) return;
-    
     try {
         await html5QrCode.stop();
-        isScanning = false;
-        startScanBtn.style.display = 'block';
-        stopScanBtn.style.display = 'none';
-    } catch (error) {
-        console.error('خطأ في إيقاف الكاميرا:', error);
+    } catch {}
+    isScanning = false;
+    startScanBtn.style.display = 'block';
+    stopScanBtn.style.display = 'none';
     }
-}
 
-// معالجة إرسال PIN
-pinSubmitBtn.addEventListener('click', async () => {
+    // =====================
+    // PIN submit
+    // =====================
+    pinSubmitBtn.addEventListener('click', async () => {
     const pin = pinInput.value.trim();
-
     hidePinError();
 
-    if (!pin) {
-        showPinError('الرجاء إدخال الرقم السري');
-        return;
-    }
+    if (!pin) return showPinError('الرجاء إدخال الرقم السري');
+    if (pin.length < 4 || pin.length > 6) return showPinError('الرقم السري يجب أن يكون من 4 إلى 6 أرقام');
+    if (!/^\d+$/.test(pin)) return showPinError('الرقم السري يجب أن يحتوي على أرقام فقط');
 
-    if (pin.length < 4 || pin.length > 6) {
-        showPinError('الرقم السري يجب أن يكون من 4 إلى 6 أرقام');
-        return;
-    }
-
-    if (!/^\d+$/.test(pin)) {
-        showPinError('الرقم السري يجب أن يحتوي على أرقام فقط');
-        return;
-    }
-
-    // تعطيل الزر مؤقتاً
     pinSubmitBtn.disabled = true;
 
     try {
-        // ✅ تحقق من الـ PIN عبر السيرفر
         const res = await fetch(`${WORKER_BASE}/auth`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pin })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin }),
         });
 
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.error || 'PIN غير صحيح');
 
-        if (!res.ok || !data.ok) {
-            throw new Error(data.error || 'PIN غير صحيح');
-        }
-
-        // ✅ إذا صحيح: احفظه وادخل للماسح
         storePin(pin);
         showScannerSection();
-
     } catch (err) {
         showPinError(err.message || 'PIN غير صحيح');
     } finally {
         pinSubmitBtn.disabled = false;
     }
-});
-
-// السماح بالضغط على Enter في حقل PIN
-pinInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        pinSubmitBtn.click();
-    }
-});
-
-// معالجة زر تشغيل الكاميرا
-    startScanBtn.addEventListener('click', async () => {
-    try {
-        await scannerBeep.play();   // فتح الصوت
-        scannerBeep.pause();
-        scannerBeep.currentTime = 0;
-    } catch (e) {
-        console.log("Audio unlock failed");
-    }
-
-    startScanning(); // تشغيل الكاميرا مرة واحدة فقط
     });
 
-// معالجة زر إيقاف الكاميرا
-stopScanBtn.addEventListener('click', stopScanning);
+    pinInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') pinSubmitBtn.click();
+    });
 
-// معالجة زر تسجيل الخروج
-logoutBtn.addEventListener('click', async () => {
+    // ✅ زر تشغيل الكاميرا (مرة واحدة فقط) + فتح الصوت
+    startScanBtn.addEventListener('click', async () => {
+    try {
+        await scannerBeep.play();
+        scannerBeep.pause();
+        scannerBeep.currentTime = 0;
+    } catch {}
+    startScanning();
+    });
+
+    stopScanBtn.addEventListener('click', stopScanning);
+
+    logoutBtn.addEventListener('click', async () => {
     if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
         await stopScanning();
         clearStoredPin();
         showPinSection();
     }
-});
+    });
 
-// تنظيف عند إغلاق الصفحة
-window.addEventListener('beforeunload', async () => {
-    if (isScanning) {
-        await stopScanning();
-    }
-});
+    window.addEventListener('beforeunload', async () => {
+    if (isScanning) await stopScanning();
+    });
 
-// تهيئة الصفحة عند التحميل
-window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', () => {
     checkStoredPin();
-});
+    });
