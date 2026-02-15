@@ -26,30 +26,45 @@ const successMessage = document.getElementById('successMessage');
 function validateField(field) {
     const value = field.value.trim();
     const errorElement = document.getElementById(field.id + 'Error');
-    
+
     // إزالة الأخطاء السابقة
     field.classList.remove('error');
     errorElement.classList.remove('show');
 
-    // التحقق من الحقول المطلوبة
+    // 🔴 حالة رقم الهاتف
+    if (field.id === 'phone') {
+
+        const phonePattern = /^(0)(5|6|7)[0-9]{8}$/;
+
+        // إذا فارغ
+        if (!value) {
+            field.classList.add('error');
+            errorElement.textContent = "الرجاء إدخال رقم الهاتف";
+            errorElement.classList.add('show');
+            return false;
+        }
+
+        // إذا لا يطابق الباترن
+        if (!phonePattern.test(value)) {
+            field.classList.add('error');
+            errorElement.textContent = "رقم الهاتف غير صحيح (يجب أن يبدأ بـ 05, 06, أو 07)";
+            errorElement.classList.add('show');
+            return false;
+        }
+
+        return true;
+    }
+
+    // 🔴 باقي الحقول المطلوبة
     if (field.hasAttribute('required') && !value) {
         field.classList.add('error');
         errorElement.classList.add('show');
         return false;
     }
 
-    // التحقق من رقم الهاتف إذا تم إدخاله
-    if (field.id === 'phone' && value) {
-        const phonePattern = /^(0)(5|6|7)[0-9]{8}$/;
-        if (!phonePattern.test(value)) {
-            field.classList.add('error');
-            errorElement.classList.add('show');
-            return false;
-        }
-    }
-
     return true;
 }
+
 
 // إضافة مستمعين للحقول
 const inputs = form.querySelectorAll('.form-input');
@@ -123,5 +138,3 @@ form.addEventListener('submit', async (e) => {
         submitBtn.classList.remove('loading');
     }
 });
-
-//https://script.google.com/macros/s/AKfycbyYZ-hVgsXHGR1NkVcZbftmsdMX5DtpzPB1gql1SnSIv_bzV8KNqrEyxBhUb2pFXkAW/exec

@@ -123,8 +123,8 @@
                 <div class="form-group">
                     <label for="phone">
                         <span class="label-icon">📱</span>
-                        رقم الهاتف
-                        <span class="optional">(اختياري)</span>
+                    (الطالب أو الولي) رقم الهاتف
+                        <span class="required">*</span>
                     </label>
                     <div class="input-wrapper">
                         <input 
@@ -134,6 +134,7 @@
                             class="form-input" 
                             placeholder="مثال: 0555123456"
                             pattern="^(0)(5|6|7)[0-9]{8}$"
+                            required
                         >
                         <div class="error-message" id="phoneError">رقم الهاتف غير صحيح (يجب أن يبدأ بـ 05, 06, أو 07)</div>
                     </div>
