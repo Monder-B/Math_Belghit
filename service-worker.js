@@ -1,4 +1,4 @@
-    const CACHE_VERSION = 'v1.0.6';
+    const CACHE_VERSION = 'v1.0.7';
     const CACHE_NAME = `math-belghit-${CACHE_VERSION}`;
 
     // الملفات التي سيتم تخزينها في الكاش
@@ -18,6 +18,8 @@
     '/Math_Belghit/icons/icon-192.png',
     '/Math_Belghit/icons/icon-512.png',
     '/Math_Belghit/beep.mp3',
+    '/Math_Belghit/dashboard.html',
+    '/Math_Belghit/dashboard.js',
 
 ];
     // التثبيت - تخزين الملفات الأساسية

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الأستاذ - MATH BELGHIT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="MATH BELGHIT">
+    <style>
+        /* Additional dashboard-specific styles */
+        .dashboard-container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .auth-card {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .dashboard-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            padding: 10px 18px;
+            background: var(--white);
+            color: var(--text-dark);
+            border: 2px solid var(--white);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .icon-btn:hover {
+            background: var(--primary-color);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .summary-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .summary-icon {
+            font-size: 32px;
+        }
+
+        .summary-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .summary-label {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .controls-bar {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 16px;
+            background: var(--white);
+            color: var(--text-dark);
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .sort-select {
+            padding: 10px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+        }
+
+        .students-section {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Desktop Table */
+        .students-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .students-table thead th {
+            background: var(--bg-light);
+            padding: 15px;
+            text-align: right;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 14px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .students-table thead th:first-child {
+            border-top-right-radius: 10px;
+        }
+
+        .students-table thead th:last-child {
+            border-top-left-radius: 10px;
+        }
+
+        .students-table tbody tr {
+            transition: background 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .students-table tbody tr:hover {
+            background: var(--bg-light);
+        }
+
+        .students-table tbody td {
+            padding: 18px 15px;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-ok {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-due {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-suspended {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Mobile Cards */
+        .student-cards {
+            display: none;
+        }
+
+        .student-card {
+            background: var(--white);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .student-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+        }
+
+        .student-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .student-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .student-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            color: var(--text-light);
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .detail-value {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        /* Loading & Empty States */
+        .loading-skeleton {
+            display: none;
+        }
+
+        .loading-skeleton.show {
+            display: block;
+        }
+
+        .skeleton-row {
+            height: 60px;
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .error-box {
+            display: none;
+            background: #fee2e2;
+            border: 2px solid #fecaca;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .error-box.show {
+            display: block;
+        }
+
+        .retry-btn {
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: #991b1b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .empty-state {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state.show {
+            display: block;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 968px) {
+            .students-table {
+                display: none;
+            }
+
+            .student-cards {
+                display: block;
+            }
+
+            .dashboard-title {
+                font-size: 22px;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+
+            .summary-value {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .dashboard-container {
+                padding: 15px;
+            }
+
+            .controls-row {
+                flex-direction: column;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .filter-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .filter-btn {
+                flex: 1;
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- خلفية الرموز الرياضية -->
+    <div class="math-bg" id="mathBg"></div>
+
+    <div class="dashboard-container">
+        <!-- Auth Section -->
+        <div id="authSection">
+            <div class="container">
+                <div class="registration-card auth-card">
+                    <!-- رموز رياضية جانبية -->
+                    <div class="corner-symbols">
+                        <span class="corner-symbol top-left">∑</span>
+                        <span class="corner-symbol top-right">∫</span>
+                        <span class="corner-symbol bottom-left">π</span>
+                        <span class="corner-symbol bottom-right">√</span>
+                    </div>
+
+                    <!-- الهيدر -->
+                    <div class="header">
+                        <div class="logo-wrapper">
+                            <img src="logo.jpg" alt="Math Belghit Logo" class="main-logo">
+                        </div>
+                        
+                        <!-- رموز رياضية زخرفية -->
+                        <div class="math-decorations">
+                            <span class="math-symbol-decor">π</span>
+                            <span class="math-symbol-decor">∑</span>
+                            <span class="math-symbol-decor">∫</span>
+                            <span class="math-symbol-decor">√</span>
+                            <span class="math-symbol-decor">∞</span>
+                        </div>
+                        
+                        <h1>لوحة تحكم الأستاذ</h1>
+                        <p>TEACHER DASHBOARD</p>
+                    </div>
+
+                    <!-- PIN Form -->
+                    <form id="pinForm">
+                        <div class="form-group">
+                            <label for="pinInput">
+                                <span class="label-icon">🔐</span>
+                                <span class="required">*</span>
+                                رمز PIN
+                            </label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="password" 
+                                    id="pinInput" 
+                                    class="form-input" 
+                                    placeholder="أدخل رمز PIN"
+                                    pattern="[0-9]{4,6}"
+                                    inputmode="numeric"
+                                    required
+                                >
+                                <div class="error-message" id="pinError">رمز PIN غير صحيح</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="pinSubmitBtn">
+                            <span class="btn-text">🔑 دخول</span>
+                            <div class="btn-loader">
+                                <div class="spinner"></div>
+                            </div>
+                        </button>
+                    </form>
+
+                    <div class="form-footer">
+                        <p>جميع البيانات محمية وسرية 🔒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" style="display: none;">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <span>📊</span>
+                    <span>لوحة تحكم الأستاذ</span>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn" id="refreshBtn">
+                        <span>🔄</span>
+                        <span>تحديث</span>
+                    </button>
+                    <button class="icon-btn" id="logoutBtn">
+                        <span>🚪</span>
+                        <span>خروج</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-grid" id="summaryGrid">
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-icon">👥</span>
+                    </div>
+                    <div class="summary-value" id="totalStudents">0</div>
+                    <div class="summary-label">إجمالي الطلاب</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-icon">✅</span>
+                    </div>
+                    <div class="summary-value" id="activeStudents">0</div>
+                    <div class="summary-label">طلاب نشطون</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-icon">⚠️</span>
+                    </div>
+                    <div class="summary-value" id="dueStudents">0</div>
+                    <div class="summary-label">مستحق الدفع</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-icon">🚫</span>
+                    </div>
+                    <div class="summary-value" id="suspendedStudents">0</div>
+                    <div class="summary-label">موقوفون</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-icon">📅</span>
+                    </div>
+                    <div class="summary-value" id="todaySessions">0</div>
+                    <div class="summary-label">حصص اليوم</div>
+                </div>
+            </div>
+
+            <!-- Error Box -->
+            <div class="error-box" id="errorBox">
+                <div style="font-weight: 700; margin-bottom: 8px;">❌ حدث خطأ</div>
+                <div id="errorMessage">فشل تحميل البيانات</div>
+                <button class="retry-btn" id="retryBtn">🔄 إعادة المحاولة</button>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls-bar">
+                <div class="controls-row">
+                    <input 
+                        type="text" 
+                        class="search-input" 
+                        id="searchInput" 
+                        placeholder="🔍 ابحث بالاسم أو الكود..."
+                    >
+                    
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">الكل</button>
+                        <button class="filter-btn" data-filter="ok">نشط</button>
+                        <button class="filter-btn" data-filter="due_at_4">مستحق</button>
+                        <button class="filter-btn" data-filter="suspended">موقوف</button>
+                    </div>
+
+                    <select class="sort-select" id="sortSelect">
+                        <option value="name">الاسم</option>
+                        <option value="sessions">عدد الحصص</option>
+                        <option value="lastAttendance">آخر حضور</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Students Section -->
+            <div class="students-section">
+                <!-- Loading Skeleton -->
+                <div class="loading-skeleton" id="loadingSkeleton">
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">📭</div>
+                    <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">لا توجد نتائج</div>
+                    <div style="font-size: 14px;">جرب تغيير معايير البحث أو الفلتر</div>
+                </div>
+
+                <!-- Desktop Table -->
+                <table class="students-table" id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>القسم</th>
+                            <th>الحصص</th>
+                            <th>متبقي للدفع</th>
+                            <th>متبقي للحد</th>
+                            <th>آخر حضور</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <!-- Rows will be inserted here -->
+                    </tbody>
+                </table>
+
+                <!-- Mobile Cards -->
+                <div class="student-cards" id="studentCards">
+                    <!-- Cards will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+    <script src="install.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/Math_Belghit/service-worker.js')
+                    .catch(console.log);
+            });
+        }
+    </script>
+</body>
+</html>
