@@ -293,6 +293,7 @@
     // =====================
     async function startScanning() {
     if (isScanning) return;
+    isScanning = true; // ✅ اقفل مباشرة لتفادي double start
 
     try {
         if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
@@ -305,21 +306,21 @@
         experimentalFeatures: { useBarCodeDetectorIfSupported: true },
         };
 
-        const cameraConfig = {
-        facingMode: "environment",
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        };
+        await html5QrCode.start(
+        { facingMode: "environment" }, // ✅ مفتاح واحد فقط
+        config,
+        onScanSuccess,
+        onScanError
+        );
 
-        await html5QrCode.start(cameraConfig, config, onScanSuccess, onScanError);
-
-        isScanning = true;
         startScanBtn.style.display = "none";
         stopScanBtn.style.display = "block";
         scanError.style.display = "none";
+
     } catch (error) {
         console.error("Camera start error:", error);
-        showScanError("فشل تشغيل الكاميرا. تأكد من السماح بالوصول إلى الكاميرا.");
+        showScanError("فشل تشغيل الكاميرا: " + (error?.message || ""));
+        isScanning = false; // ✅ رجّعها لو فشل
     }
     }
 
