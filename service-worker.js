@@ -1,4 +1,4 @@
-    const CACHE_VERSION = 'v1.0.0';
+    const CACHE_VERSION = 'v1.0.1';
     const CACHE_NAME = `math-belghit-${CACHE_VERSION}`;
 
     // الملفات التي سيتم تخزينها في الكاش
