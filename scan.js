@@ -217,6 +217,7 @@ async function onScanSuccess(decodedText) {
             scanLockout = false;
         }, 1500);
     }
+    console.log("SCANNED:", decodedText);alert(decodedText);
 }
 
 // دالة معالجة خطأ المسح
