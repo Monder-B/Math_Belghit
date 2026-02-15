@@ -306,3 +306,19 @@
         height: 180px;
     }
 }
+
+/* ⚡ Flash effect like barcode scanner */
+    .scan-flash::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.75);
+    z-index: 99999;
+    pointer-events: none;
+    animation: flashPulse 120ms ease-out;
+    }
+
+    @keyframes flashPulse {
+    from { opacity: 1; }
+    to { opacity: 0; }
+    }

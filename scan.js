@@ -66,6 +66,37 @@ function checkStoredPin() {
     return false;
 }
 
+
+    // 🔊 صوت باركود قوي
+    const scannerBeep = new Audio('/Math_Belghit/beep.mp3');
+    scannerBeep.preload = "auto";
+    scannerBeep.volume = 1.0;
+
+    // ⚡ تأثير ضوئي (وميض)
+    function flashEffect() {
+    document.body.classList.add('scan-flash');
+    setTimeout(() => document.body.classList.remove('scan-flash'), 120);
+    }
+
+    // 🔦 تشغيل فلاش الكاميرا (إن كان مدعوم)
+    async function torchBlink(durationMs = 120) {
+    try {
+        if (!html5QrCode) return;
+        const cam = html5QrCode.getRunningTrack?.();
+        if (!cam) return;
+
+        const cap = cam.getCapabilities?.();
+        if (!cap || !cap.torch) return;
+
+        await cam.applyConstraints({ advanced: [{ torch: true }] });
+        setTimeout(async () => {
+        try { await cam.applyConstraints({ advanced: [{ torch: false }] }); } catch {}
+        }, durationMs);
+    } catch {
+        // بعض الأجهزة تمنع torch
+    }
+    }
+
 // دالة حفظ PIN
 function storePin(pin) {
     const expiry = Date.now() + (PIN_EXPIRY_HOURS * 60 * 60 * 1000);
@@ -120,6 +151,18 @@ function showScanError(message) {
 
 // دالة عرض النتيجة
 function showResult(data) {
+
+        // ✅ صوت + فلاش
+    try {
+        scannerBeep.currentTime = 0;
+        scannerBeep.play();
+    } catch {}
+
+    flashEffect();
+    torchBlink(120);
+
+    // 📳 اهتزاز قوي (تأثير جهاز)
+    if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
     resultBox.style.display = 'block';
     
     // تحديد اللون والأيقونة حسب الحالة
@@ -361,7 +404,17 @@ pinInput.addEventListener('keypress', (e) => {
 });
 
 // معالجة زر تشغيل الكاميرا
-startScanBtn.addEventListener('click', startScanning);
+    startScanBtn.addEventListener('click', async () => {
+    try {
+        await scannerBeep.play();   // فتح الصوت
+        scannerBeep.pause();
+        scannerBeep.currentTime = 0;
+    } catch (e) {
+        console.log("Audio unlock failed");
+    }
+
+    startScanning(); // تشغيل الكاميرا مرة واحدة فقط
+    });
 
 // معالجة زر إيقاف الكاميرا
 stopScanBtn.addEventListener('click', stopScanning);
