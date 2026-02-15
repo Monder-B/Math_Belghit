@@ -1,27 +1,25 @@
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بطاقة الطالب - MATH BELGHIT</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>بطاقة التلميذ - MATH BELGHIT</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
 
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="card.css">
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="card.css" />
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     </head>
     <body>
-    <!-- خلفية الرموز الرياضية -->
     <div class="math-bg" id="mathBg"></div>
 
     <div class="container">
         <div class="registration-card">
 
-        <!-- رموز رياضية جانبية -->
         <div class="corner-symbols">
             <span class="corner-symbol top-left">∑</span>
             <span class="corner-symbol top-right">∫</span>
@@ -29,10 +27,9 @@
             <span class="corner-symbol bottom-right">√</span>
         </div>
 
-        <!-- الهيدر -->
         <div class="header">
             <div class="logo-wrapper">
-            <img src="logo.jpg" alt="Math Belghit Logo" class="main-logo">
+            <img src="logo.jpg" alt="Math Belghit Logo" class="main-logo" />
             </div>
 
             <div class="math-decorations">
@@ -55,37 +52,29 @@
             </div>
         </div>
 
-        <!-- محتوى البطاقة -->
         <div id="cardContent">
-
-            <!-- Loader -->
             <div id="loader" class="card-loader">
             <div class="spinner"></div>
-            <p style="margin-top: 15px; color: var(--text-light);">جاري تحميل البيانات...</p>
+            <p style="margin-top:15px;color:var(--text-light);">جاري تحميل البيانات...</p>
             </div>
 
-            <!-- رسالة خطأ -->
             <div id="errorMessage" class="error-card" style="display:none;">
             <div class="error-icon">⚠️</div>
             <h3 id="errorTitle">حدث خطأ</h3>
-            <p id="errorText" style="margin-top:10px; color: var(--text-light);"></p>
+            <p id="errorText" style="margin-top:10px;color:var(--text-light);"></p>
             <button onclick="window.location.href='index.html'" class="submit-btn" style="margin-top:20px;">
                 <span class="btn-text">← رجوع للتسجيل</span>
             </button>
             </div>
 
-            <!-- بطاقة الطالب -->
             <div id="studentCard" style="display:none;">
-
-            <!-- الاسم فقط -->
             <div class="student-info" style="text-align:center;">
                 <div class="info-row" style="justify-content:center;">
-                <span class="info-label">👤 الاسم الكامل:</span>
+                <span class="info-label">👤 الاسم:</span>
                 <span class="info-value" id="fullName">---</span>
                 </div>
             </div>
 
-            <!-- QR Code -->
             <div class="qr-section">
                 <div class="qr-title" style="justify-content:center;">
                 <span class="qr-icon">📱</span>
@@ -98,15 +87,13 @@
 
                 <p class="qr-hint">اعرض هذا الكود عند الحضور</p>
 
-                <!-- صندوق الحصص + آخر حصة -->
-                <div id="statsBox" class="alert-box info" style="margin-top:12px; text-align:center;"></div>
+                <!-- ✅ صندوق الحصص + آخر حصة -->
+                <div id="statsBox" class="alert-box info" style="margin-top:12px;text-align:center;"></div>
+            </div>
             </div>
 
-            </div> <!-- /#studentCard -->
+        </div><!-- /cardContent -->
 
-        </div> <!-- /#cardContent -->
-
-        <!-- تذييل البطاقة -->
         <div class="form-footer">
             <p>جميع البيانات محمية وسرية 🔒</p>
             <div class="footer-branding">
@@ -114,8 +101,8 @@
             </div>
         </div>
 
-        </div> <!-- /.registration-card -->
-    </div> <!-- /.container -->
+        </div>
+    </div>
 
     <script src="card.js"></script>
     <script src="install.js"></script>
@@ -123,8 +110,7 @@
     <script>
         if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/Math_Belghit/service-worker.js')
-            .catch(console.log);
+            navigator.serviceWorker.register('/Math_Belghit/service-worker.js').catch(console.log);
         });
         }
     </script>
