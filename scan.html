@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>مسح حضور</title>
+  <style>
+    body{font-family:system-ui;background:#0b0f19;color:#fff;margin:0;padding:16px}
+    #reader{max-width:420px;margin:0 auto}
+    .box{max-width:420px;margin:12px auto;background:#121a2a;padding:12px;border-radius:14px}
+  </style>
+</head>
+<body>
+  <div id="reader"></div>
+  <div class="box" id="result">📷 وجّه الكاميرا نحو QR</div>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script>
+    const WORKER = "https://long-mud-24f2.mmondeer346.workers.dev";
+    const resultBox = document.getElementById("result");
+
+    function show(msg){ resultBox.textContent = msg; }
+
+    const qr = new Html5Qrcode("reader");
+    qr.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      async (decodedText) => {
+        // decodedText هنا هو qrToken
+        qr.pause(true);
+        show("⏳ جاري تسجيل الحصة...");
+
+        const res = await fetch(`${WORKER}/scan`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ qrToken: decodedText })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          show("❌ " + (data.error || "فشل"));
+        } else {
+          show(`✅ تم تسجيل الحصة | حضر: ${data.sessionsInCycle} | باقي للدفع: ${data.remainingToPay} | باقي للحد الأقصى: ${data.remainingToMax} | الحالة: ${data.state}`);
+        }
+
+        setTimeout(()=> qr.resume(), 1500);
+      },
+      (err) => {}
+    ).catch(e => show("❌ لا يمكن فتح الكاميرا: " + e));
+  </script>
+</body>
+</html>

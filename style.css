@@ -30,6 +30,10 @@ body {
     padding: 20px;
     position: relative;
     overflow-x: hidden;
+    transition: opacity 0.35s ease;
+}
+body.fade-out {
+    opacity: 0;
 }
 
 /* خلفية رموز رياضية متحركة */

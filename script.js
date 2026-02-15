@@ -106,35 +106,48 @@ form.addEventListener('submit', async (e) => {
     };
 
     try {
-        // إرسال البيانات إلى الويب هوك
-        const response = await fetch('https://long-mud-24f2.mmondeer346.workers.dev/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        });
+    const response = await fetch('https://long-mud-24f2.mmondeer346.workers.dev/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    });
 
-        // محاكاة وقت الإرسال (يمكن إزالتها في الإنتاج)
-        await new Promise(resolve => setTimeout(resolve, 1000));
+    const result = await response.json();
 
-        // إظهار رسالة النجاح
-        form.style.display = 'none';
-        successMessage.classList.add('show');
-
-        // إعادة تعيين النموذج بعد 3 ثوان
-        setTimeout(() => {
-            form.reset();
-            form.style.display = 'block';
-            successMessage.classList.remove('show');
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('loading');
-        }, 3000);
-
-    } catch (error) {
-        console.error('خطأ في الإرسال:', error);
-        alert('حدث خطأ في الإرسال. الرجاء المحاولة مرة أخرى.');
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('loading');
+    if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'فشل التسجيل');
     }
+
+    // ✅ إظهار رسالة النجاح
+    form.style.display = 'none';
+    successMessage.classList.add('show');
+
+    // ✅ عرض الكود داخل رسالة النجاح (بدون الاعتماد على nth-child)
+    const msgLine = successMessage.querySelector('div:nth-child(2)') || successMessage;
+    if (msgLine) {
+        msgLine.innerHTML = `تم التسجيل بنجاح! ✅<br>
+        <span style="font-size:14px;opacity:.9">كودك: <b>${result.studentCode}</b></span>
+        <br><span style="font-size:13px;opacity:.8">جارٍ تجهيز بطاقتك...</span>`;
+    }
+
+    // ✅ انتقال سلس إلى البطاقة
+    setTimeout(() => {
+        document.body.classList.add('fade-out');
+        setTimeout(() => {
+            window.location.href = `card.html?code=${encodeURIComponent(result.studentCode)}`;
+        }, 350);
+    }, 1400);
+
+} catch (error) {
+    console.error('خطأ في الإرسال:', error);
+    alert('حدث خطأ في الإرسال: ' + (error.message || ''));
+
+    // رجّع الزر
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('loading');
+
+    // خليك في الفورم
+    form.style.display = 'block';
+    successMessage.classList.remove('show');
+}
 });
