@@ -1,52 +1,145 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>مسح حضور</title>
-  <style>
-    body{font-family:system-ui;background:#0b0f19;color:#fff;margin:0;padding:16px}
-    #reader{max-width:420px;margin:0 auto}
-    .box{max-width:420px;margin:12px auto;background:#121a2a;padding:12px;border-radius:14px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مسح QR - MATH BELGHIT</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="scan.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-  <div id="reader"></div>
-  <div class="box" id="result">📷 وجّه الكاميرا نحو QR</div>
+    <!-- خلفية الرموز الرياضية -->
+    <div class="math-bg" id="mathBg"></div>
 
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <script>
-    const WORKER = "https://long-mud-24f2.mmondeer346.workers.dev";
-    const resultBox = document.getElementById("result");
+    <div class="container">
+        <div class="registration-card">
+            <!-- رموز رياضية جانبية -->
+            <div class="corner-symbols">
+                <span class="corner-symbol top-left">∑</span>
+                <span class="corner-symbol top-right">∫</span>
+                <span class="corner-symbol bottom-left">π</span>
+                <span class="corner-symbol bottom-right">√</span>
+            </div>
+            
+            <!-- الهيدر -->
+            <div class="header">
+                <div class="logo-wrapper">
+                    <img src="logo.jpg" alt="Math Belghit Logo" class="main-logo">
+                </div>
+                
+                <!-- رموز رياضية زخرفية -->
+                <div class="math-decorations">
+                    <span class="math-symbol-decor">π</span>
+                    <span class="math-symbol-decor">∑</span>
+                    <span class="math-symbol-decor">∫</span>
+                    <span class="math-symbol-decor">√</span>
+                    <span class="math-symbol-decor">∞</span>
+                </div>
+                
+                <h1>مسح حضور الطلاب</h1>
+                <p>MATH - BELGHIT</p>
+                
+                <!-- معادلة رياضية جميلة -->
+                <div class="math-equation">
+                    <span class="equation-text">E = mc²</span>
+                    <span class="equation-separator">|</span>
+                    <span class="equation-text">a² + b² = c²</span>
+                    <span class="equation-separator">|</span>
+                    <span class="equation-text">∫ f(x)dx</span>
+                </div>
+            </div>
 
-    function show(msg){ resultBox.textContent = msg; }
+            <!-- قسم إدخال الـ PIN -->
+            <div id="pinSection" class="pin-section">
+                <div class="pin-card">
+                    <div class="pin-icon">🔐</div>
+                    <h3>تسجيل دخول الأستاذ</h3>
+                    <p>الرجاء إدخال الرقم السري للمتابعة</p>
+                    
+                    <div class="pin-input-wrapper">
+                        <input 
+                            type="password" 
+                            id="pinInput" 
+                            class="form-input pin-input" 
+                            placeholder="أدخل الرقم السري (4-6 أرقام)"
+                            maxlength="6"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                        >
+                    </div>
+                    
+                    <button id="pinSubmitBtn" class="submit-btn">
+                        <span class="btn-text">🔓 دخول</span>
+                    </button>
+                    
+                    <div id="pinError" class="error-message" style="text-align: center; margin-top: 12px;"></div>
+                </div>
+            </div>
 
-    const qr = new Html5Qrcode("reader");
-    qr.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      async (decodedText) => {
-        // decodedText هنا هو qrToken
-        qr.pause(true);
-        show("⏳ جاري تسجيل الحصة...");
+            <!-- قسم الماسح الضوئي -->
+            <div id="scannerSection" class="scanner-section" style="display: none;">
+                <!-- أزرار التحكم العلوية -->
+                <div class="scanner-controls-top">
+                    <button id="logoutBtn" class="action-btn secondary logout-btn">
+                        <span class="btn-text">🚪 تسجيل خروج</span>
+                    </button>
+                </div>
 
-        const res = await fetch(`${WORKER}/scan`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ qrToken: decodedText })
-        });
+                <!-- منطقة الكاميرا -->
+                <div class="scanner-container">
+                    <div id="qr-reader"></div>
+                    <div class="scanner-overlay">
+                        <div class="scanner-frame"></div>
+                    </div>
+                </div>
 
-        const data = await res.json();
-        if (!res.ok || !data.ok) {
-          show("❌ " + (data.error || "فشل"));
-        } else {
-          show(`✅ تم تسجيل الحصة | حضر: ${data.sessionsInCycle} | باقي للدفع: ${data.remainingToPay} | باقي للحد الأقصى: ${data.remainingToMax} | الحالة: ${data.state}`);
+                <!-- أزرار التحكم -->
+                <div class="scanner-controls">
+                    <button id="startScanBtn" class="action-btn primary">
+                        <span class="btn-text">▶️ تشغيل الكاميرا</span>
+                    </button>
+                    <button id="stopScanBtn" class="action-btn secondary" style="display: none;">
+                        <span class="btn-text">⏸ إيقاف الكاميرا</span>
+                    </button>
+                </div>
+
+                <!-- صندوق النتيجة -->
+                <div id="resultBox" class="result-box" style="display: none;">
+                    <div class="result-icon" id="resultIcon">✅</div>
+                    <h3 id="resultTitle">تم تسجيل الحصة</h3>
+                    <div class="result-details" id="resultDetails"></div>
+                </div>
+
+                <!-- رسالة خطأ عامة -->
+                <div id="scanError" class="error-box" style="display: none;"></div>
+            </div>
+
+            <!-- تذييل -->
+            <div class="form-footer">
+                <p>جميع البيانات محمية وسرية 🔒</p>
+                <div class="footer-branding">
+                    <span class="brand-text">MATH - BELGHIT</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scan.js"></script>
+    <script src="install.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/Math_Belghit/service-worker.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW registration failed'));
+            });
         }
-
-        setTimeout(()=> qr.resume(), 1500);
-      },
-      (err) => {}
-    ).catch(e => show("❌ لا يمكن فتح الكاميرا: " + e));
-  </script>
+    </script>
 </body>
 </html>

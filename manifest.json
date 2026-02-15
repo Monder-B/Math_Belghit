@@ -1,0 +1,67 @@
+{
+  "name": "MATH BELGHIT - Attendance",
+  "short_name": "MATH BELGHIT",
+  "description": "نظام الحضور والتسجيل لطلاب الرياضيات",
+  "start_url": "/Math_Belghit/index.html",
+  "scope": "/Math_Belghit/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "dir": "rtl",
+  "lang": "ar",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/Math_Belghit/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Math_Belghit/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "تسجيل طالب جديد",
+      "short_name": "تسجيل",
+      "description": "فتح صفحة التسجيل",
+      "url": "./index.html",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "بطاقة الطالب",
+      "short_name": "البطاقة",
+      "description": "عرض بطاقة الطالب",
+      "url": "./card.html",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "مسح QR",
+      "short_name": "المسح",
+      "description": "فتح ماسح QR للأستاذ",
+      "url": "./scan.html",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "screenshots": []
+}

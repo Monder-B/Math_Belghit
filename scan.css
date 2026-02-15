@@ -1,0 +1,308 @@
+/* إضافات CSS خاصة بصفحة المسح */
+/* يتم استخدام هذا الملف مع style.css الأصلي */
+
+/* قسم الـ PIN */
+.pin-section {
+    text-align: center;
+}
+
+.pin-card {
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.02), rgba(0, 0, 0, 0.02));
+    border-radius: 16px;
+    padding: 30px 25px;
+    border: 2px solid rgba(26, 26, 26, 0.08);
+}
+
+.pin-icon {
+    font-size: 64px;
+    margin-bottom: 15px;
+    animation: pulse 2s infinite;
+}
+
+.pin-card h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.pin-card p {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+}
+
+.pin-input-wrapper {
+    margin-bottom: 20px;
+}
+
+.pin-input {
+    text-align: center;
+    font-size: 24px;
+    letter-spacing: 8px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+/* قسم الماسح */
+.scanner-section {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.scanner-controls-top {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.logout-btn {
+    max-width: 200px;
+}
+
+.scanner-container {
+    position: relative;
+    background: #000000;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 
+        0 0 0 3px var(--primary-color),
+        0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+#qr-reader {
+    width: 100%;
+    border: none;
+}
+
+#qr-reader video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+#qr-reader__dashboard {
+    display: none !important;
+}
+
+.scanner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scanner-frame {
+    width: 250px;
+    height: 250px;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    position: relative;
+    animation: scannerPulse 2s infinite;
+}
+
+.scanner-frame::before,
+.scanner-frame::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border: 4px solid var(--white);
+}
+
+.scanner-frame::before {
+    top: -4px;
+    right: -4px;
+    border-bottom: none;
+    border-left: none;
+    border-top-right-radius: 16px;
+}
+
+.scanner-frame::after {
+    bottom: -4px;
+    left: -4px;
+    border-top: none;
+    border-right: none;
+    border-bottom-left-radius: 16px;
+}
+
+@keyframes scannerPulse {
+    0%, 100% {
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+    50% {
+        border-color: rgba(255, 255, 255, 0.9);
+    }
+}
+
+.scanner-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* صندوق النتيجة */
+.result-box {
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+    animation: slideDown 0.4s ease;
+    border: 3px solid;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-box.success {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.result-box.warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.result-box.error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.result-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.result-box h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+}
+
+.result-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+}
+
+.result-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.result-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.result-message {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* صندوق الخطأ */
+.error-box {
+    padding: 16px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    color: #b91c1c;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+    animation: shake 0.5s ease;
+}
+
+/* تجاوب مع الموبايل */
+@media (max-width: 640px) {
+    .pin-card {
+        padding: 25px 20px;
+    }
+
+    .pin-icon {
+        font-size: 56px;
+    }
+
+    .pin-card h3 {
+        font-size: 20px;
+    }
+
+    .pin-input {
+        font-size: 20px;
+        letter-spacing: 6px;
+    }
+
+    .scanner-frame {
+        width: 200px;
+        height: 200px;
+    }
+
+    .result-box {
+        padding: 16px;
+    }
+
+    .result-icon {
+        font-size: 40px;
+    }
+
+    .result-box h3 {
+        font-size: 18px;
+    }
+
+    .result-row {
+        padding: 10px;
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+
+    .result-value {
+        text-align: right;
+        width: 100%;
+    }
+}
+
+@media (max-width: 400px) {
+    .scanner-frame {
+        width: 180px;
+        height: 180px;
+    }
+}

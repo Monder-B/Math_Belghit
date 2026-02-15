@@ -137,5 +137,14 @@
     </div>
 
     <script src="card.js"></script>
+    <script src="install.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/Math_Belghit/service-worker.js')
+          .catch(console.log);
+      });
+    }
+  </script>
 </body>
 </html>

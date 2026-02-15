@@ -8,6 +8,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="MATH BELGHIT">
 </head>
 <body>
     <!-- خلفية الرموز الرياضية -->
@@ -172,5 +177,14 @@
     </div>
 
     <script src="script.js"></script>
+    <script src="install.js"></script>
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/Math_Belghit/service-worker.js')
+            .catch(console.log);
+        });
+    }
+    </script>
 </body>
 </html>
