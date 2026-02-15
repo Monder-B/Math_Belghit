@@ -1,8 +1,8 @@
-// إنشاء خلفية الرموز الرياضية (نفس script.js)
-const mathSymbols = ['π', '∑', '∫', '√', '∞', 'α', 'β', 'θ', '≈', '≠', '≤', '≥', 'Δ', 'φ', 'λ', 'Ω'];
-const mathBg = document.getElementById('mathBg');
+    // إنشاء خلفية الرموز الرياضية (نفس script.js)
+    const mathSymbols = ['π', '∑', '∫', '√', '∞', 'α', 'β', 'θ', '≈', '≠', '≤', '≥', 'Δ', 'φ', 'λ', 'Ω'];
+    const mathBg = document.getElementById('mathBg');
 
-function createMathSymbols() {
+    function createMathSymbols() {
     for (let i = 0; i < 25; i++) {
         const symbol = document.createElement('div');
         symbol.className = 'math-symbol';
@@ -13,87 +13,99 @@ function createMathSymbols() {
         symbol.style.fontSize = (Math.random() * 2 + 1) + 'rem';
         mathBg.appendChild(symbol);
     }
-}
+    }
+    if (mathBg) createMathSymbols();
 
-createMathSymbols();
+    // متغيرات عامة
+    const WORKER_BASE = "https://long-mud-24f2.mmondeer346.workers.dev";
 
-// متغيرات عامة
-const WORKER_BASE = "https://long-mud-24f2.mmondeer346.workers.dev";
-let currentStudentData = null;
+    // العناصر
+    const loader = document.getElementById('loader');
+    const errorMessage = document.getElementById('errorMessage');
+    const studentCard = document.getElementById('studentCard');
+    const errorTitle = document.getElementById('errorTitle');
+    const errorText = document.getElementById('errorText');
 
-// العناصر
-const loader = document.getElementById('loader');
-const errorMessage = document.getElementById('errorMessage');
-const studentCard = document.getElementById('studentCard');
-const errorTitle = document.getElementById('errorTitle');
-const errorText = document.getElementById('errorText');
+    function getQueryParam(name) {
+    return new URLSearchParams(window.location.search).get(name);
+    }
 
-// دالة لقراءة Query String
-function getQueryParam(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-}
+    function showError(title, message) {
+    if (loader) loader.style.display = 'none';
+    if (studentCard) studentCard.style.display = 'none';
+    if (errorMessage) errorMessage.style.display = 'block';
+    if (errorTitle) errorTitle.textContent = title;
+    if (errorText) errorText.textContent = message;
+    }
 
-// دالة عرض رسالة خطأ
-function showError(title, message) {
-    loader.style.display = 'none';
-    studentCard.style.display = 'none';
-    errorMessage.style.display = 'block';
-    errorTitle.textContent = title;
-    errorText.textContent = message;
-}
+    function generateQRCode(text) {
+    if (typeof QRCode === "undefined") {
+        showError("مكتبة QR غير متوفرة", "لم يتم تحميل مكتبة qrcodejs. تأكد من الاتصال بالإنترنت.");
+        return;
+    }
 
-// دالة إنشاء QR Code
-function generateQRCode(data) {
     const qrContainer = document.getElementById('qrcode');
-    qrContainer.innerHTML = ''; // مسح QR القديم
-    
+    if (!qrContainer) return;
+
+    qrContainer.innerHTML = '';
     new QRCode(qrContainer, {
-        text: data,
+        text,
         width: 200,
         height: 200,
         colorDark: "#000000",
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.H
     });
-}
-
-// دالة عرض بطاقة الطالب
-function displayStudentCard(data) {
-    currentStudentData = data;
-    
-    // ملء البيانات
-    document.getElementById('fullName').textContent = data.fullName || '---';
-    document.getElementById('className').textContent = data.class || '---';
-    document.getElementById('studentCode').textContent = data.studentCode || '----';
-    
-    // إنشاء QR Code
-    if (!data.studentCode) {
-    showError('كود غير متوفر', 'لم يتم استلام studentCode من الخادم.');
-    return;
     }
-    generateQRCode(data.studentCode);
-    
-    // (اختياري) عرض الحالة
-    const statusBox = document.getElementById('statusBox');
-    if (statusBox && typeof data.sessionsInCycle === "number") {
-    statusBox.innerHTML = `
-        ✅ حضرت: <b>${data.sessionsInCycle}</b> |
-        💰 باقي للدفع: <b>${data.remainingToPay}</b> |
-        ⛔ باقي للحد الأقصى: <b>${data.remainingToMax}</b>
-    `;
-}
-    
-    // إخفاء Loader وعرض البطاقة
-    loader.style.display = 'none';
-    errorMessage.style.display = 'none';
-    studentCard.style.display = 'block';
-}
 
-// دالة جلب بيانات الطالب من API
+    function displayStudentCard(data) {
+    // ✅ الاسم فقط
+    const fullNameEl = document.getElementById('fullName');
+    if (fullNameEl) fullNameEl.textContent = data.fullName || '---';
+
+    // ✅ QR = studentCode (لأن scan.js يبحث بالكود)
+    if (!data.studentCode) {
+        showError('كود غير متوفر', 'لم يتم استلام studentCode من الخادم.');
+        return;
+    }
+    generateQRCode(String(data.studentCode).trim());
+
+    // ✅ الحصص + آخر حصة
+    const statsBox = document.getElementById('statsBox');
+    if (statsBox) {
+        const sessions = (typeof data.sessionsInCycle === "number") ? data.sessionsInCycle : null;
+
+        const lastRaw = data.lastAttendanceAt || data.lastSessionAt || data.lastScanAt || "";
+
+        let lastText = "لا توجد حصص بعد";
+        if (lastRaw) {
+        const d = new Date(lastRaw);
+        lastText = !isNaN(d.getTime())
+            ? d.toLocaleString('ar-DZ', { dateStyle: 'medium', timeStyle: 'short' })
+            : String(lastRaw);
+        }
+
+        const sessionsText = (sessions === null) ? "غير متوفر" : String(sessions);
+
+        statsBox.innerHTML = `
+        <div style="font-weight:800; font-size:16px; margin-bottom:6px;">
+            ✅ عدد الحصص: <b>${sessionsText}</b>
+        </div>
+        <div style="font-size:14px; opacity:.9;">
+            🕒 آخر حصة: <b>${lastText}</b>
+        </div>
+        `;
+    }
+
+    // ✅ عرض البطاقة
+    if (loader) loader.style.display = 'none';
+    if (errorMessage) errorMessage.style.display = 'none';
+    if (studentCard) studentCard.style.display = 'block';
+    }
+
     async function fetchStudentData(code) {
     try {
-        const response = await fetch(`${WORKER_BASE}/student?code=${encodeURIComponent(code)}`);
+        const response = await fetch(`${WORKER_BASE}/student?code=${encodeURIComponent(code)}`, { cache: "no-store" });
         const data = await response.json();
 
         if (!response.ok) {
@@ -101,91 +113,20 @@ function displayStudentCard(data) {
         return;
         }
 
-        if (data.ok) {
-        displayStudentCard(data);
-        } else {
-        showError('بيانات غير صحيحة', data.error || 'لم يتم العثور على الطالب بهذا الكود');
-        }
+        if (data.ok) displayStudentCard(data);
+        else showError('بيانات غير صحيحة', data.error || 'لم يتم العثور على الطالب بهذا الكود');
+
     } catch (error) {
         console.error('خطأ في جلب البيانات:', error);
         showError('خطأ في الاتصال', 'تعذر الاتصال بالخادم. تحقق من الاتصال بالإنترنت وحاول مرة أخرى.');
     }
     }
 
-// زر نسخ الكود
-document.getElementById('copyCodeBtn').addEventListener('click', async () => {
-    const code = document.getElementById('studentCode').textContent;
-    const btn = document.getElementById('copyCodeBtn');
-    const originalText = btn.innerHTML;
-
-    const showCopied = () => {
-        btn.innerHTML = '<span class="btn-text">✓ تم النسخ</span>';
-        btn.classList.add('copied');
-
-        setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.classList.remove('copied');
-        }, 2000);
-    };
-
-    try {
-        // الطريقة الحديثة
-        await navigator.clipboard.writeText(code);
-        showCopied();
-    } catch (error) {
-        console.error('فشل النسخ (clipboard):', error);
-
-        // طريقة بديلة للمتصفحات اللي ما تدعمش clipboard
-        try {
-            const textArea = document.createElement('textarea');
-            textArea.value = code;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-999999px';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-
-            const ok = document.execCommand('copy');
-            document.body.removeChild(textArea);
-
-            if (ok) {
-                showCopied();
-            } else {
-                alert('فشل نسخ الكود. يرجى نسخه يدوياً: ' + code);
-            }
-        } catch (err) {
-            alert('فشل نسخ الكود. يرجى نسخه يدوياً: ' + code);
-        }
-    }
-});
-
-// زر تحديث QR
-document.getElementById('refreshBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('refreshBtn');
-    const originalText = btn.innerHTML;
-    
-    btn.disabled = true;
-    btn.innerHTML = '<div class="spinner" style="width: 16px; height: 16px; border-width: 2px;"></div>';
-    
+    window.addEventListener('DOMContentLoaded', () => {
     const code = getQueryParam('code');
-    if (code) {
-        await fetchStudentData(code);
-    }
-    
-    setTimeout(() => {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }, 1000);
-});
-
-// تهيئة الصفحة عند التحميل
-window.addEventListener('DOMContentLoaded', () => {
-    const code = getQueryParam('code');
-    
     if (!code) {
         showError('كود مفقود', 'يرجى تقديم كود الطالب في الرابط. مثال: card.html?code=A9K3');
         return;
     }
-    
     fetchStudentData(code);
-});
+    });

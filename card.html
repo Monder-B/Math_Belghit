@@ -1,150 +1,132 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بطاقة الطالب - MATH BELGHIT</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="card.css">
+
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-</head>
-<body>
+    </head>
+    <body>
     <!-- خلفية الرموز الرياضية -->
     <div class="math-bg" id="mathBg"></div>
 
     <div class="container">
         <div class="registration-card">
-            <!-- رموز رياضية جانبية -->
-            <div class="corner-symbols">
-                <span class="corner-symbol top-left">∑</span>
-                <span class="corner-symbol top-right">∫</span>
-                <span class="corner-symbol bottom-left">π</span>
-                <span class="corner-symbol bottom-right">√</span>
-            </div>
-            
-            <!-- الهيدر -->
-            <div class="header">
-                <div class="logo-wrapper">
-                    <img src="logo.jpg" alt="Math Belghit Logo" class="main-logo">
-                </div>
-                
-                <!-- رموز رياضية زخرفية -->
-                <div class="math-decorations">
-                    <span class="math-symbol-decor">π</span>
-                    <span class="math-symbol-decor">∑</span>
-                    <span class="math-symbol-decor">∫</span>
-                    <span class="math-symbol-decor">√</span>
-                    <span class="math-symbol-decor">∞</span>
-                </div>
-                
-                <h1>بطاقة الطالب</h1>
-                <p>MATH - BELGHIT</p>
-                
-                <!-- معادلة رياضية جميلة -->
-                <div class="math-equation">
-                    <span class="equation-text">E = mc²</span>
-                    <span class="equation-separator">|</span>
-                    <span class="equation-text">a² + b² = c²</span>
-                    <span class="equation-separator">|</span>
-                    <span class="equation-text">∫ f(x)dx</span>
-                </div>
+
+        <!-- رموز رياضية جانبية -->
+        <div class="corner-symbols">
+            <span class="corner-symbol top-left">∑</span>
+            <span class="corner-symbol top-right">∫</span>
+            <span class="corner-symbol bottom-left">π</span>
+            <span class="corner-symbol bottom-right">√</span>
+        </div>
+
+        <!-- الهيدر -->
+        <div class="header">
+            <div class="logo-wrapper">
+            <img src="logo.jpg" alt="Math Belghit Logo" class="main-logo">
             </div>
 
-            <!-- محتوى البطاقة -->
-            <div id="cardContent">
-                <!-- Loader -->
-                <div id="loader" class="card-loader">
-                    <div class="spinner"></div>
-                    <p style="margin-top: 15px; color: var(--text-light);">جاري تحميل البيانات...</p>
-                </div>
-
-                <!-- رسالة خطأ -->
-                <div id="errorMessage" class="error-card" style="display: none;">
-                    <div class="error-icon">⚠️</div>
-                    <h3 id="errorTitle">حدث خطأ</h3>
-                    <p id="errorText" style="margin-top: 10px; color: var(--text-light);"></p>
-                    <button onclick="window.location.href='index.html'" class="submit-btn" style="margin-top: 20px;">
-                        <span class="btn-text">← رجوع للتسجيل</span>
-                    </button>
-                </div>
-
-                <!-- بطاقة الطالب -->
-                <div id="studentCard" style="display: none;">
-                    <!-- معلومات الطالب -->
-                    <div class="student-info">
-                        <div class="info-row">
-                            <span class="info-label">👤 الاسم الكامل:</span>
-                            <span class="info-value" id="fullName">---</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">🎓 القسم:</span>
-                            <span class="info-value" id="className">---</span>
-                        </div>
-                        <div class="info-row highlight">
-                            <span class="info-label">🎫 كود الطالب:</span>
-                            <span class="info-value code-value" id="studentCode">----</span>
-                        </div>
-                    </div>
-
-                    <!-- QR Code -->
-                    <div class="qr-section">
-                        <div class="qr-title">
-                            <span class="qr-icon">📱</span>
-                            <span>رمز الاستجابة السريع (QR)</span>
-                        </div>
-                        <div class="qr-container">
-                            <div id="qrcode"></div>
-                        </div>
-                        <p class="qr-hint">اعرض هذا الكود عند الحضور</p>
-                        <div id="statusBox" class="alert-box info" style="margin-top:12px;"></div>
-                    </div>
-
-                    <!-- تنبيهات -->
-                    <div class="alerts-section">
-                        <div class="alert-box info">
-                            <span class="alert-icon">ℹ️</span>
-                            <span>عند وصولك إلى 4 حصص يجب الدفع</span>
-                        </div>
-                        <div class="alert-box warning">
-                            <span class="alert-icon">⚠️</span>
-                            <span>الحد الأقصى 8 حصص</span>
-                        </div>
-                    </div>
-
-                    <!-- أزرار -->
-                    <div class="card-actions">
-                        <button id="copyCodeBtn" class="action-btn primary">
-                            <span class="btn-text">📋 نسخ كود الطالب</span>
-                        </button>
-                        <button id="refreshBtn" class="action-btn secondary">
-                            <span class="btn-text">🔄 تحديث الـ QR</span>
-                        </button>
-                    </div>
-                </div>
+            <div class="math-decorations">
+            <span class="math-symbol-decor">π</span>
+            <span class="math-symbol-decor">∑</span>
+            <span class="math-symbol-decor">∫</span>
+            <span class="math-symbol-decor">√</span>
+            <span class="math-symbol-decor">∞</span>
             </div>
 
-            <!-- تذييل البطاقة -->
-            <div class="form-footer">
-                <p>جميع البيانات محمية وسرية 🔒</p>
-                <div class="footer-branding">
-                    <span class="brand-text">MATH - BELGHIT</span>
-                </div>
+            <h1>بطاقة التلميذ</h1>
+            <p>MATH - BELGHIT</p>
+
+            <div class="math-equation">
+            <span class="equation-text">E = mc²</span>
+            <span class="equation-separator">|</span>
+            <span class="equation-text">a² + b² = c²</span>
+            <span class="equation-separator">|</span>
+            <span class="equation-text">∫ f(x)dx</span>
             </div>
         </div>
-    </div>
+
+        <!-- محتوى البطاقة -->
+        <div id="cardContent">
+
+            <!-- Loader -->
+            <div id="loader" class="card-loader">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: var(--text-light);">جاري تحميل البيانات...</p>
+            </div>
+
+            <!-- رسالة خطأ -->
+            <div id="errorMessage" class="error-card" style="display:none;">
+            <div class="error-icon">⚠️</div>
+            <h3 id="errorTitle">حدث خطأ</h3>
+            <p id="errorText" style="margin-top:10px; color: var(--text-light);"></p>
+            <button onclick="window.location.href='index.html'" class="submit-btn" style="margin-top:20px;">
+                <span class="btn-text">← رجوع للتسجيل</span>
+            </button>
+            </div>
+
+            <!-- بطاقة الطالب -->
+            <div id="studentCard" style="display:none;">
+
+            <!-- الاسم فقط -->
+            <div class="student-info" style="text-align:center;">
+                <div class="info-row" style="justify-content:center;">
+                <span class="info-label">👤 الاسم الكامل:</span>
+                <span class="info-value" id="fullName">---</span>
+                </div>
+            </div>
+
+            <!-- QR Code -->
+            <div class="qr-section">
+                <div class="qr-title" style="justify-content:center;">
+                <span class="qr-icon">📱</span>
+                <span>رمز الحضور (QR)</span>
+                </div>
+
+                <div class="qr-container">
+                <div id="qrcode"></div>
+                </div>
+
+                <p class="qr-hint">اعرض هذا الكود عند الحضور</p>
+
+                <!-- صندوق الحصص + آخر حصة -->
+                <div id="statsBox" class="alert-box info" style="margin-top:12px; text-align:center;"></div>
+            </div>
+
+            </div> <!-- /#studentCard -->
+
+        </div> <!-- /#cardContent -->
+
+        <!-- تذييل البطاقة -->
+        <div class="form-footer">
+            <p>جميع البيانات محمية وسرية 🔒</p>
+            <div class="footer-branding">
+            <span class="brand-text">MATH - BELGHIT</span>
+            </div>
+        </div>
+
+        </div> <!-- /.registration-card -->
+    </div> <!-- /.container -->
 
     <script src="card.js"></script>
     <script src="install.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/Math_Belghit/service-worker.js')
-          .catch(console.log);
-      });
-    }
-  </script>
-</body>
-</html>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/Math_Belghit/service-worker.js')
+            .catch(console.log);
+        });
+        }
+    </script>
+    </body>
+    </html>
