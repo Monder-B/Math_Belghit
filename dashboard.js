@@ -132,7 +132,20 @@ async function validatePIN(pin) {
     
     return true;
 }
+    async function pay4Sessions(pin, studentId) {
+    const response = await fetch(`${CONFIG.WORKER_BASE}/pay4`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin, studentId })
+    });
 
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+        throw new Error(data.error || "فشل خصم 4 حصص");
+    }
+    return data; // { ok:true, sessionsInCycle, state, ... }
+    }
 /**
  * Fetch dashboard data
  */
@@ -246,10 +259,10 @@ function updateSummary(summary) {
 /**
  * Render students table (desktop)
  */
-        function renderTable(students) {
+            function renderTable(students) {
     const tbody = document.getElementById('studentsTableBody');
 
-    if (students.length === 0) {
+    if (!students || students.length === 0) {
         tbody.innerHTML = '';
         showEmptyState();
         return;
@@ -262,10 +275,10 @@ function updateSummary(summary) {
         <td>${escapeHtml(formatDate(s.lastAttendanceAt))}</td>
         <td>
             <button 
-            class="filter-btn" 
+            class="filter-btn"
             style="background:#111; color:#fff; border-color:#111;"
-            data-reset-id="${escapeHtml(s.studentId)}">
-            ♻️ Reset
+            data-pay4-id="${escapeHtml(s.studentId)}">
+            💳 دفع 4
             </button>
         </td>
         </tr>
@@ -273,12 +286,11 @@ function updateSummary(summary) {
 
     tbody.innerHTML = rows;
 
-    // attach reset clicks
-    tbody.querySelectorAll('[data-reset-id]').forEach(btn => {
+    tbody.querySelectorAll('[data-pay4-id]').forEach(btn => {
         btn.onclick = (e) => {
         e.stopPropagation();
-        const id = btn.getAttribute('data-reset-id');
-        resetStudentCounter(id);
+        const id = btn.getAttribute('data-pay4-id');
+        pay4ForStudent(id);
         };
     });
     }
@@ -620,24 +632,19 @@ async function initDashboard() {
     });
 }
 
-   async function resetStudentCounter(studentId){
-    if (!confirm("هل تريد إعادة عداد الحصص لهذا الطالب؟ سيبدأ من 0 في دورة جديدة.")) return;
+    async function pay4ForStudent(studentId) {
+    if (!confirm("تأكيد الدفع؟ سيتم خصم 4 حصص (غير مدفوعة) لهذا الطالب.")) return;
 
-    try{
-        const res = await fetch(`${CONFIG.WORKER_BASE}/reset`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: state.pin, studentId })
-        });
+    try {
+        const data = await pay4Sessions(state.pin, studentId); // calls /pay4
 
-        const data = await res.json();
-        if(!res.ok || !data.ok) throw new Error(data.error || "فشل Reset");
-
-        // ✅ بعد reset نعاود نحمّل الداشبورد
+        // ✅ أسهل حاجة: نعاود نحمّل الداشبورد كامل
         await loadDashboard();
 
-    }catch(err){
-        alert(err.message);
+        // (اختياري) رسالة صغيرة
+        alert("✅ تم خصم 4 حصص بنجاح");
+    } catch (err) {
+        alert(err.message || "فشل خصم 4 حصص");
     }
     }
 
