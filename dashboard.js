@@ -620,16 +620,7 @@ async function initDashboard() {
     });
 }
 
-// ==================== INITIALIZE ====================
-
-// Wait for DOM to be ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDashboard);
-} else {
-    initDashboard();
-}
-
-    async function resetStudentCounter(studentId){
+   async function resetStudentCounter(studentId){
     if (!confirm("هل تريد إعادة عداد الحصص لهذا الطالب؟ سيبدأ من 0 في دورة جديدة.")) return;
 
     try{
@@ -649,3 +640,26 @@ if (document.readyState === 'loading') {
         alert(err.message);
     }
     }
+
+
+        function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+// ==================== INITIALIZE ====================
+
+// Wait for DOM to be ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboard);
+} else {
+    initDashboard();
+}
+
+ 
+
+    
