@@ -246,29 +246,42 @@ function updateSummary(summary) {
 /**
  * Render students table (desktop)
  */
-function renderTable(students) {
+        function renderTable(students) {
     const tbody = document.getElementById('studentsTableBody');
-    
+
     if (students.length === 0) {
         tbody.innerHTML = '';
         showEmptyState();
         return;
     }
-    
-    const rows = students.map(student => `
+
+    const rows = students.map(s => `
         <tr>
-            <td style="font-weight: 700;">${student.fullName}</td>
-            <td>${student.class}</td>
-            <td>${student.sessionsInCycle}</td>
-            <td>${student.remainingToPay}</td>
-            <td>${student.remainingToMax}</td>
-            <td>${formatDate(student.lastAttendanceAt)}</td>
-            <td>${getStateBadge(student.state)}</td>
+        <td style="font-weight:900;">${escapeHtml(s.fullName || '---')}</td>
+        <td style="font-weight:900; font-size:16px;">${Number(s.sessionsInCycle || 0)}</td>
+        <td>${escapeHtml(formatDate(s.lastAttendanceAt))}</td>
+        <td>
+            <button 
+            class="filter-btn" 
+            style="background:#111; color:#fff; border-color:#111;"
+            data-reset-id="${escapeHtml(s.studentId)}">
+            ♻️ Reset
+            </button>
+        </td>
         </tr>
     `).join('');
-    
+
     tbody.innerHTML = rows;
-}
+
+    // attach reset clicks
+    tbody.querySelectorAll('[data-reset-id]').forEach(btn => {
+        btn.onclick = (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-reset-id');
+        resetStudentCounter(id);
+        };
+    });
+    }
 
 /**
  * Render student cards (mobile)
@@ -615,3 +628,24 @@ if (document.readyState === 'loading') {
 } else {
     initDashboard();
 }
+
+    async function resetStudentCounter(studentId){
+    if (!confirm("هل تريد إعادة عداد الحصص لهذا الطالب؟ سيبدأ من 0 في دورة جديدة.")) return;
+
+    try{
+        const res = await fetch(`${CONFIG.WORKER_BASE}/reset`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: state.pin, studentId })
+        });
+
+        const data = await res.json();
+        if(!res.ok || !data.ok) throw new Error(data.error || "فشل Reset");
+
+        // ✅ بعد reset نعاود نحمّل الداشبورد
+        await loadDashboard();
+
+    }catch(err){
+        alert(err.message);
+    }
+    }
