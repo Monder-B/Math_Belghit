@@ -1,24 +1,27 @@
+    // =====================================================
+    // scan.js (FAST + ACCURATE) - MATH_BELGHIT
+    // يعتمد على QRToken مباشرة (أسرع: /scan فقط)
+    // =====================================================
+
     // =====================
     // خلفية الرموز الرياضية
     // =====================
-    const mathSymbols = ['π', '∑', '∫', '√', '∞', 'α', 'β', 'θ', '≈', '≠', '≤', '≥', 'Δ', 'φ', 'λ', 'Ω'];
+    const mathSymbols = ['π','∑','∫','√','∞','α','β','θ','≈','≠','≤','≥','Δ','φ','λ','Ω'];
     const mathBg = document.getElementById('mathBg');
-    const tokenCache = new Map(); // كاش qrToken حسب studentCode
 
-    function createMathSymbols() {
+    (function createMathSymbols(){
     if (!mathBg) return;
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 22; i++) {
         const symbol = document.createElement('div');
         symbol.className = 'math-symbol';
         symbol.textContent = mathSymbols[Math.floor(Math.random() * mathSymbols.length)];
         symbol.style.left = Math.random() * 100 + '%';
         symbol.style.top = Math.random() * 100 + '%';
         symbol.style.animationDelay = Math.random() * 10 + 's';
-        symbol.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+        symbol.style.fontSize = (Math.random() * 1.6 + 1.1) + 'rem';
         mathBg.appendChild(symbol);
     }
-    }
-    createMathSymbols();
+    })();
 
     // =====================
     // إعدادات عامة
@@ -26,13 +29,23 @@
     const WORKER_BASE = "https://long-mud-24f2.mmondeer346.workers.dev";
 
     const PIN_STORAGE_KEY = "teacher_pin";
-    const PIN_EXPIRY_KEY = "teacher_pin_expiry";
+    const PIN_EXPIRY_KEY  = "teacher_pin_expiry";
     const PIN_EXPIRY_HOURS = 8;
+
+    // Performance / Accuracy knobs
+    const SCAN_FPS = 15;                 // أسرع من 10 بدون ما يثقل بزاف
+    const QRBOX_SIZE = 240;              // حجم مناسب لمعظم الكاميرات
+    const LOCKOUT_MS = 900;              // قفل عام بعد نجاح scan
+    const SAME_TOKEN_COOLDOWN_MS = 3500; // منع نفس الطالب من التكرار بسرعة
+    const NETWORK_TIMEOUT_MS = 6500;     // timeout للـ fetch
 
     let html5QrCode = null;
     let currentPin = null;
     let isScanning = false;
     let scanLockout = false;
+
+    // token cooldown map
+    const recentTokens = new Map(); // token -> lastTime
 
     // =====================
     // عناصر DOM
@@ -42,42 +55,38 @@
     const pinInput = document.getElementById('pinInput');
     const pinSubmitBtn = document.getElementById('pinSubmitBtn');
     const pinError = document.getElementById('pinError');
-    const startScanBtn = document.getElementById('startScanBtn');
-    const stopScanBtn = document.getElementById('stopScanBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
 
-    const resultBox = document.getElementById('resultBox');
-    const resultIcon = document.getElementById('resultIcon');
-    const resultTitle = document.getElementById('resultTitle');
+    const startScanBtn = document.getElementById('startScanBtn');
+    const stopScanBtn  = document.getElementById('stopScanBtn');
+    const logoutBtn    = document.getElementById('logoutBtn');
+
+    const resultBox     = document.getElementById('resultBox');
+    const resultIcon    = document.getElementById('resultIcon');
+    const resultTitle   = document.getElementById('resultTitle');
     const resultDetails = document.getElementById('resultDetails');
-    const scanError = document.getElementById('scanError');
+    const scanError     = document.getElementById('scanError');
 
     // =====================
     // 🔊 صوت + تأثير ضوئي
     // =====================
-    // مهم: لازم ملف beep.mp3 يكون فعلاً داخل /Math_Belghit/
     const scannerBeep = new Audio('/Math_Belghit/beep.mp3');
     scannerBeep.preload = "auto";
     scannerBeep.volume = 1.0;
 
-    // وميض CSS: لازم تضيف .scan-flash في scan.css
     function flashEffect() {
     document.body.classList.add('scan-flash');
     setTimeout(() => document.body.classList.remove('scan-flash'), 120);
     }
 
-    // محاولة تشغيل torch إن كان مدعوم (بدون ما يطيح)
     async function torchBlink(durationMs = 120) {
     try {
         if (!html5QrCode) return;
 
-        // بعض نسخ html5-qrcode فيها getRunningTrack
-        const track = typeof html5QrCode.getRunningTrack === "function"
+        const track = (typeof html5QrCode.getRunningTrack === "function")
         ? html5QrCode.getRunningTrack()
         : null;
 
         if (!track) return;
-
         const cap = track.getCapabilities?.();
         if (!cap || !cap.torch) return;
 
@@ -85,9 +94,7 @@
         setTimeout(async () => {
         try { await track.applyConstraints({ advanced: [{ torch: false }] }); } catch {}
         }, durationMs);
-    } catch {
-        // تجاهل
-    }
+    } catch {}
     }
 
     // =====================
@@ -151,12 +158,10 @@
     function showScanError(message) {
     scanError.textContent = message;
     scanError.style.display = 'block';
-    // باش تشوفها دايماً حتى لو كانت تحت
     scanError.scrollIntoView({ behavior: "smooth", block: "center" });
-
     setTimeout(() => {
         scanError.style.display = 'none';
-    }, 4500);
+    }, 3800);
     }
 
     // =====================
@@ -193,18 +198,22 @@
         resultTitle.textContent = 'تم تسجيل الحصة';
     }
 
+    const sessionsInCycle = Number(data.sessionsInCycle ?? 0);
+    const remainingToPay  = Number(data.remainingToPay ?? 0);
+    const remainingToMax  = Number(data.remainingToMax ?? 0);
+
     resultDetails.innerHTML = `
         <div class="result-row">
         <span class="result-label">✅ حضر:</span>
-        <span class="result-value">${data.sessionsInCycle}</span>
+        <span class="result-value">${sessionsInCycle}</span>
         </div>
         <div class="result-row">
         <span class="result-label">💰 المتبقي للدفع:</span>
-        <span class="result-value">${data.remainingToPay}</span>
+        <span class="result-value">${remainingToPay}</span>
         </div>
         <div class="result-row">
         <span class="result-label">⛔ المتبقي للحد الأقصى:</span>
-        <span class="result-value">${data.remainingToMax}</span>
+        <span class="result-value">${remainingToMax}</span>
         </div>
     `;
 
@@ -216,58 +225,86 @@
 
     setTimeout(() => {
         resultBox.style.display = 'none';
-    }, 2500);
+    }, 2200);
     }
 
     // =====================
-    // API calls
+    // Helpers: fetch timeout + cooldown
+    // =====================
+    async function fetchWithTimeout(url, options = {}, timeoutMs = NETWORK_TIMEOUT_MS) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const res = await fetch(url, { ...options, signal: controller.signal });
+        return res;
+    } finally {
+        clearTimeout(id);
+    }
+    }
+
+    function isTokenOnCooldown(token) {
+    const now = Date.now();
+    const last = recentTokens.get(token) || 0;
+    if (now - last < SAME_TOKEN_COOLDOWN_MS) return true;
+    recentTokens.set(token, now);
+
+    // تنظيف بسيط
+    if (recentTokens.size > 60) {
+        for (const [k, t] of recentTokens.entries()) {
+        if (now - t > 2 * SAME_TOKEN_COOLDOWN_MS) recentTokens.delete(k);
+        }
+    }
+    return false;
+    }
+
+    // =====================
+    // API call: /scan
     // =====================
     async function sendQrToServer(qrToken) {
-    const response = await fetch(`${WORKER_BASE}/scan`, {
+    const response = await fetchWithTimeout(`${WORKER_BASE}/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        cache: "no-store",
         body: JSON.stringify({ qrToken, pin: currentPin }),
     });
 
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.ok) throw new Error(data.error || 'فشل تسجيل الحضور');
+
+    if (!response.ok || !data.ok) {
+        throw new Error(data.error || `فشل تسجيل الحضور (HTTP ${response.status})`);
+    }
+
     showResult(data);
     }
 
+    // =====================
+    // Scan callbacks
+    // =====================
     async function onScanSuccess(decodedText) {
     if (scanLockout) return;
     scanLockout = true;
 
     try {
-        const code = String(decodedText ?? "").trim();
-        if (!code) throw new Error("QR فارغ");
+        const token = String(decodedText ?? "").trim();
+        if (!token) throw new Error("QR فارغ");
 
-        // ✅ كاش للسرعة
-        let qrToken = tokenCache.get(code);
-
-        if (!qrToken) {
-        const sRes = await fetch(`${WORKER_BASE}/student?code=${encodeURIComponent(code)}`, {
-            method: "GET",
-            cache: "no-store",
-        });
-
-        const sData = await sRes.json().catch(() => ({}));
-        if (!sRes.ok || !sData.ok) throw new Error(sData.error || `Student not found (HTTP ${sRes.status})`);
-        if (!sData.qrToken) throw new Error("qrToken غير متوفر في رد /student");
-
-        qrToken = String(sData.qrToken).trim();
-        tokenCache.set(code, qrToken);
+        // ✅ منع نفس الطالب من التسجيل مرتين بسرعة
+        if (isTokenOnCooldown(token)) {
+        // ما نعرضوش error، فقط نتجاهل
+        return;
         }
 
-        await sendQrToServer(qrToken);
+        // ✅ Request واحد فقط
+        await sendQrToServer(token);
+
     } catch (e) {
-        showScanError(e.message || "حدث خطأ أثناء المسح");
+        showScanError(e?.message || "حدث خطأ أثناء المسح");
     } finally {
-        setTimeout(() => (scanLockout = false), 650);
+        setTimeout(() => (scanLockout = false), LOCKOUT_MS);
     }
     }
 
-    // ✅ onScanError محسّن
+    // تجاهل أخطاء noise
     let lastRealErrorAt = 0;
     function onScanError(errorMessage) {
     const msg = String(errorMessage || "").toLowerCase();
@@ -293,45 +330,44 @@
     // =====================
     async function startScanning() {
     if (isScanning) return;
-    isScanning = true; // ✅ اقفل مباشرة لتفادي double start
+    isScanning = true;
 
     try {
         if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
 
         const config = {
-        fps: 14,
-        qrbox: { width: 240, height: 240 },
+        fps: SCAN_FPS,
+        qrbox: { width: QRBOX_SIZE, height: QRBOX_SIZE },
         aspectRatio: 1.0,
         disableFlip: true,
         experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+        // formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] // إذا حبيت تحصره QR فقط
         };
 
         await html5QrCode.start(
-        { facingMode: "environment" }, // ✅ مفتاح واحد فقط
+        { facingMode: "environment" },
         config,
         onScanSuccess,
         onScanError
         );
 
         startScanBtn.style.display = "none";
-        stopScanBtn.style.display = "block";
-        scanError.style.display = "none";
+        stopScanBtn.style.display  = "block";
+        scanError.style.display    = "none";
 
     } catch (error) {
         console.error("Camera start error:", error);
         showScanError("فشل تشغيل الكاميرا: " + (error?.message || ""));
-        isScanning = false; // ✅ رجّعها لو فشل
+        isScanning = false;
     }
     }
 
     async function stopScanning() {
     if (!isScanning || !html5QrCode) return;
-    try {
-        await html5QrCode.stop();
-    } catch {}
+    try { await html5QrCode.stop(); } catch {}
     isScanning = false;
     startScanBtn.style.display = 'block';
-    stopScanBtn.style.display = 'none';
+    stopScanBtn.style.display  = 'none';
     }
 
     // =====================
@@ -348,9 +384,10 @@
     pinSubmitBtn.disabled = true;
 
     try {
-        const res = await fetch(`${WORKER_BASE}/auth`, {
+        const res = await fetchWithTimeout(`${WORKER_BASE}/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({ pin }),
         });
 
@@ -359,8 +396,9 @@
 
         storePin(pin);
         showScannerSection();
+
     } catch (err) {
-        showPinError(err.message || 'PIN غير صحيح');
+        showPinError(err?.message || 'PIN غير صحيح');
     } finally {
         pinSubmitBtn.disabled = false;
     }
