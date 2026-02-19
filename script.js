@@ -124,7 +124,7 @@ form.addEventListener('submit', async (e) => {
         lastName: document.getElementById('lastName').value.trim(),
         class: document.getElementById('class').value,
         phone: document.getElementById('phone').value.trim() || 'غير محدد',
-        pin: document.getElementById('studentPin').value.trim()
+        pin: document.getElementById('pin').value.trim()
     };
 
     try {
