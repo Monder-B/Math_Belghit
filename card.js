@@ -211,8 +211,18 @@
 
             if (data && data.ok) {
             memoryCache.set(cleanCode, data);
-            try { sessionStorage.setItem(SESSION_KEY_PREFIX + cleanCode, JSON.stringify(data)); } catch {}
-            displayStudentCard(data);
+            // 2) sessionStorage cache (عرض سريع فقط، بدون منع التحديث)
+            try {
+            const saved = sessionStorage.getItem(SESSION_KEY_PREFIX + cleanCode);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.ok) {
+                memoryCache.set(cleanCode, parsed);
+                displayStudentCard(parsed); // عرض سريع
+                // ⚠️ لا نرجع هنا، نكمل نجلب من السيرفر للتحديث الحقيقي
+                }
+            }
+            } catch {}
             } else {
             showError('بيانات غير صحيحة', data.error || 'لم يتم العثور على الطالب بهذا الكود');
             }
