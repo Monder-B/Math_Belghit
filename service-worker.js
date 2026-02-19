@@ -1,17 +1,14 @@
-    const CACHE_VERSION = 'v1.0.9';
+    const CACHE_VERSION = 'v1.0.10';
     const CACHE_NAME = `math-belghit-${CACHE_VERSION}`;
 
     // الملفات التي سيتم تخزينها في الكاش
     const STATIC_ASSETS = [
     '/Math_Belghit/index.html',
     '/Math_Belghit/card.html',
-    '/Math_Belghit/scan.html',
     '/Math_Belghit/style.css',
     '/Math_Belghit/card.css',
-    '/Math_Belghit/scan.css',
     '/Math_Belghit/script.js',
-    '/Math_Belghit/card.js',
-    '/Math_Belghit/scan.js',
+    '/Math_Belghit/card.js',,
     '/Math_Belghit/install.js',
     '/Math_Belghit/logo.jpg',
     '/Math_Belghit/manifest.json',
