@@ -55,6 +55,27 @@ function validateField(field) {
         return true;
     }
 
+    // 🔴 حالة PIN
+if (field.id === 'studentPin') {
+    const pinPattern = /^[0-9]{4}$/;
+
+    if (!value) {
+        field.classList.add('error');
+        errorElement.textContent = "الرجاء إدخال PIN";
+        errorElement.classList.add('show');
+        return false;
+    }
+
+    if (!pinPattern.test(value)) {
+        field.classList.add('error');
+        errorElement.textContent = "يجب إدخال 4 أرقام فقط";
+        errorElement.classList.add('show');
+        return false;
+    }
+
+    return true;
+}
+
     // 🔴 باقي الحقول المطلوبة
     if (field.hasAttribute('required') && !value) {
         field.classList.add('error');
@@ -102,7 +123,8 @@ form.addEventListener('submit', async (e) => {
         firstName: document.getElementById('firstName').value.trim(),
         lastName: document.getElementById('lastName').value.trim(),
         class: document.getElementById('class').value,
-        phone: document.getElementById('phone').value.trim() || 'غير محدد'
+        phone: document.getElementById('phone').value.trim() || 'غير محدد',
+        pin: document.getElementById('studentPin').value.trim()
     };
 
     try {

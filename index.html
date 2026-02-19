@@ -144,7 +144,28 @@
                         <div class="error-message" id="phoneError">رقم الهاتف غير صحيح (يجب أن يبدأ بـ 05, 06, أو 07)</div>
                     </div>
                 </div>
-
+                <!-- PIN التلميذ -->
+                <div class="form-group">
+                <label for="studentPin">
+                    <span class="label-icon">🔐</span>
+                    <span class="required">*</span>
+                    أدخل أربع أرقام (PIN)
+                </label>
+                <div class="input-wrapper">
+                    <input
+                    type="password"
+                    id="studentPin"
+                    name="studentPin"
+                    class="form-input"
+                    placeholder="أدخل 4 أرقام"
+                    pattern="^[0-9]{4}$"
+                    inputmode="numeric"
+                    maxlength="4"
+                    required
+                    >
+                    <div class="error-message" id="studentPinError">يجب إدخال 4 أرقام فقط</div>
+                </div>
+                </div>
                 <!-- زر الإرسال -->
                 <button type="submit" class="submit-btn" id="submitBtn">
                     <span class="btn-text">✓ تسجيل الآن</span>
