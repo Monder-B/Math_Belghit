@@ -174,32 +174,35 @@
         // Data
         // =====================
         async function fetchStudentData(code) {
-        const cleanCode = String(code || "").trim();
+        const cleanCode = String(code || "").trim().toUpperCase();
         if (!cleanCode) {
             showError('كود مفقود', 'يرجى تقديم كود الطالب في الرابط. مثال: card.html?code=A9K3');
             return;
         }
 
-        // 1) memory cache
-        if (memoryCache.has(cleanCode)) {
-            displayStudentCard(memoryCache.get(cleanCode));
-            return;
-        }
+        // ✅ 0) عرض loader
+        if (loader) loader.style.display = 'block';
+        if (errorMessage) errorMessage.style.display = 'none';
+        if (studentCard) studentCard.style.display = 'none';
 
-        // 2) sessionStorage cache
+        // ✅ 1) عرض سريع من sessionStorage إن وجد (بدون ما نوقف طلب السيرفر)
         try {
             const saved = sessionStorage.getItem(SESSION_KEY_PREFIX + cleanCode);
             if (saved) {
             const parsed = JSON.parse(saved);
             if (parsed && parsed.ok) {
                 memoryCache.set(cleanCode, parsed);
-                displayStudentCard(parsed);
-                return;
+                displayStudentCard(parsed); // عرض سريع
             }
             }
         } catch {}
 
-        // 3) fetch
+        // ✅ 2) إذا كان موجود في memoryCache (عرض سريع أيضا)
+        if (memoryCache.has(cleanCode)) {
+            displayStudentCard(memoryCache.get(cleanCode));
+        }
+
+        // ✅ 3) fetch من السيرفر (التحديث الحقيقي)
         try {
             const url = `${WORKER_BASE}/student?code=${encodeURIComponent(cleanCode)}`;
             const { res, data } = await fetchJsonWithTimeout(url, 9000);
@@ -210,22 +213,18 @@
             }
 
             if (data && data.ok) {
+            // ✅ خزّن الجديد
             memoryCache.set(cleanCode, data);
-            // 2) sessionStorage cache (عرض سريع فقط، بدون منع التحديث)
             try {
-            const saved = sessionStorage.getItem(SESSION_KEY_PREFIX + cleanCode);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                if (parsed && parsed.ok) {
-                memoryCache.set(cleanCode, parsed);
-                displayStudentCard(parsed); // عرض سريع
-                // ⚠️ لا نرجع هنا، نكمل نجلب من السيرفر للتحديث الحقيقي
-                }
-            }
+                sessionStorage.setItem(SESSION_KEY_PREFIX + cleanCode, JSON.stringify(data));
             } catch {}
-            } else {
-            showError('بيانات غير صحيحة', data.error || 'لم يتم العثور على الطالب بهذا الكود');
+
+            // ✅ أهم سطر كان ناقص عندك:
+            displayStudentCard(data);
+            return;
             }
+
+            showError('بيانات غير صحيحة', data.error || 'لم يتم العثور على الطالب بهذا الكود');
 
         } catch (error) {
             console.error('خطأ في جلب البيانات:', error);
@@ -235,6 +234,9 @@
             showError('خطأ في الاتصال', msg);
         }
         }
+
+
+
         function showAttendMsg(type, text) {
         if (!attendMsg) return;
         attendMsg.style.display = "block";
