@@ -11,9 +11,8 @@
 
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="card.css" />
-
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     </head>
+
     <body>
     <div class="math-bg" id="mathBg"></div>
 
@@ -73,22 +72,32 @@
                 <span class="info-label">👤 الاسم:</span>
                 <span class="info-value" id="fullName">---</span>
                 </div>
+
+                <!-- ✅ كود التلميذ + زر النسخ -->
+                <div class="info-row highlight" style="justify-content:center; gap:10px; flex-wrap:wrap;">
+                <span class="info-label">🔢 كود التلميذ:</span>
+                <span class="info-value code-value" id="studentCodeText">----</span>
+
+                <button id="copyCodeBtn" class="action-btn primary" style="max-width:220px;">
+                    <span class="btn-text">📋 نسخ الكود</span>
+                </button>
+                </div>
             </div>
 
-            <div class="qr-section">
-                <div class="qr-title" style="justify-content:center;">
-                <span class="qr-icon">📱</span>
-                <span>رمز الحضور (QR)</span>
-                </div>
+            <!-- ✅ صندوق الحصص + آخر حصة -->
+            <div id="statsBox" class="alert-box info" style="margin-top:12px;text-align:center;"></div>
+            <!-- ✅ تسجيل الحصة (بالكود فقط) -->
+            <div class="attend-box" style="margin-top:14px;">
+            <div style="font-weight:800; margin-bottom:8px;">🧾 تسجيل الحصة</div>
 
-                <div class="qr-container">
-                <div id="qrcode"></div>
-                </div>
+            <div class="attend-row">
+                <input id="attendInput" class="form-input attend-input" placeholder="تسجيل الحصة (ألصق الكود هنا)" inputmode="text" />
+                <button id="attendBtn" class="action-btn primary" style="max-width:220px;">
+                <span class="btn-text">✅ تسجيل الحصة</span>
+                </button>
+            </div>
 
-                <p class="qr-hint">اعرض هذا الكود عند الحضور</p>
-
-                <!-- ✅ صندوق الحصص + آخر حصة -->
-                <div id="statsBox" class="alert-box info" style="margin-top:12px;text-align:center;"></div>
+            <div id="attendMsg" class="attend-msg" style="display:none;"></div>
             </div>
             </div>
 

@@ -1,146 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مسح QR - MATH BELGHIT</title>
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#000000">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-
-    <!-- ✅ أسرع تحميل للمكتبة -->
-    <link rel="preconnect" href="https://unpkg.com" crossorigin>
-
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="scan.css">
-
-    <!-- ✅ defer باش ما يبلوكاش render -->
-    <script src="https://unpkg.com/html5-qrcode" defer></script>
-</head>
-<body>
-    <!-- خلفية الرموز الرياضية -->
-    <div class="math-bg" id="mathBg"></div>
-
-    <div class="container">
-        <div class="registration-card">
-            <!-- رموز رياضية جانبية -->
-            <div class="corner-symbols">
-                <span class="corner-symbol top-left">∑</span>
-                <span class="corner-symbol top-right">∫</span>
-                <span class="corner-symbol bottom-left">π</span>
-                <span class="corner-symbol bottom-right">√</span>
-            </div>
-
-            <!-- الهيدر -->
-            <div class="header">
-                <div class="logo-wrapper">
-                    <img src="logo.jpg" alt="Math Belghit Logo" class="main-logo">
-                </div>
-
-                <div class="math-decorations">
-                    <span class="math-symbol-decor">π</span>
-                    <span class="math-symbol-decor">∑</span>
-                    <span class="math-symbol-decor">∫</span>
-                    <span class="math-symbol-decor">√</span>
-                    <span class="math-symbol-decor">∞</span>
-                </div>
-
-                <h1>مسح حضور الطلاب</h1>
-                <p>MATH - BELGHIT</p>
-
-                <div class="math-equation">
-                    <span class="equation-text">E = mc²</span>
-                    <span class="equation-separator">|</span>
-                    <span class="equation-text">a² + b² = c²</span>
-                    <span class="equation-separator">|</span>
-                    <span class="equation-text">∫ f(x)dx</span>
-                </div>
-            </div>
-
-            <!-- قسم إدخال الـ PIN -->
-            <div id="pinSection" class="pin-section">
-                <div class="pin-card">
-                    <div class="pin-icon">🔐</div>
-                    <h3>تسجيل دخول الأستاذ</h3>
-                    <p>الرجاء إدخال الرقم السري للمتابعة</p>
-
-                    <div class="pin-input-wrapper">
-                        <input
-                            type="password"
-                            id="pinInput"
-                            class="form-input pin-input"
-                            placeholder="أدخل الرقم السري (4-6 أرقام)"
-                            maxlength="6"
-                            inputmode="numeric"
-                            pattern="[0-9]*"
-                        >
-                    </div>
-
-                    <button id="pinSubmitBtn" class="submit-btn">
-                        <span class="btn-text">🔓 دخول</span>
-                    </button>
-
-                    <div id="pinError" class="error-message" style="text-align: center; margin-top: 12px;"></div>
-                </div>
-            </div>
-
-            <!-- قسم الماسح الضوئي -->
-            <div id="scannerSection" class="scanner-section" style="display: none;">
-                <div class="scanner-controls-top">
-                    <button id="logoutBtn" class="action-btn secondary logout-btn">
-                        <span class="btn-text">🚪 تسجيل خروج</span>
-                    </button>
-                </div>
-
-                <div class="scanner-container">
-                    <div id="qr-reader"></div>
-                    <div class="scanner-overlay">
-                        <div class="scanner-frame"></div>
-                    </div>
-                </div>
-
-                <div class="scanner-controls">
-                    <button id="startScanBtn" class="action-btn primary">
-                        <span class="btn-text">▶️ تشغيل الكاميرا</span>
-                    </button>
-                    <button id="stopScanBtn" class="action-btn secondary" style="display: none;">
-                        <span class="btn-text">⏸ إيقاف الكاميرا</span>
-                    </button>
-                </div>
-
-                <div id="resultBox" class="result-box" style="display: none;">
-                    <div class="result-icon" id="resultIcon">✅</div>
-                    <h3 id="resultTitle">تم تسجيل الحصة</h3>
-                    <div class="result-details" id="resultDetails"></div>
-                </div>
-
-                <div id="scanError" class="error-box" style="display: none;"></div>
-            </div>
-
-            <div class="form-footer">
-                <p>جميع البيانات محمية وسرية 🔒</p>
-                <div class="footer-branding">
-                    <span class="brand-text">MATH - BELGHIT</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ✅ defer: يضمن html5-qrcode تحمّلت قبل ما scan.js يخدم -->
-    <script src="scan.js" defer></script>
-    <script src="install.js" defer></script>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/Math_Belghit/service-worker.js')
-                    .catch(() => {});
-            });
-        }
-    </script>
-</body>
-</html>

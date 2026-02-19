@@ -271,6 +271,49 @@
     cursor: not-allowed;
 }
 
+    .attend-box {
+    background: rgba(26, 26, 26, 0.03);
+    border: 2px solid rgba(26, 26, 26, 0.08);
+    border-radius: 16px;
+    padding: 16px;
+    }
+
+    .attend-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    flex-wrap: wrap;
+    justify-content: center;
+    }
+
+    .attend-input {
+    min-width: 240px;
+    flex: 1;
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: 2px;
+    }
+
+    .attend-msg {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    text-align: center;
+    border: 2px solid;
+    }
+
+    .attend-msg.ok {
+    background: rgba(16, 185, 129, 0.10);
+    border-color: rgba(16, 185, 129, 0.25);
+    color: #065f46;
+    }
+
+    .attend-msg.bad {
+    background: rgba(239, 68, 68, 0.10);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #991b1b;
+    }
 /* تجاوب مع الموبايل */
 @media (max-width: 640px) {
     .student-info {
