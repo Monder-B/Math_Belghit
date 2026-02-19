@@ -119,13 +119,28 @@ form.addEventListener('submit', async (e) => {
     submitBtn.classList.add('loading');
 
     // جمع البيانات
-    const formData = {
+    // جمع البيانات
+        const studentPinEl = document.getElementById('studentPin');
+        const rawPin = (studentPinEl?.value ?? '').toString();
+        const pin = rawPin.replace(/\D/g, '').slice(0, 4); // digits only
+
+        // (اختياري) نرجع القيمة منظفة داخل input
+        if (studentPinEl) studentPinEl.value = pin;
+
+        if (pin.length !== 4) {
+        alert("حدث خطأ في الإرسال: PIN غير صالح (لازم 4 أرقام)");
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        return;
+        }
+
+        const formData = {
         firstName: document.getElementById('firstName').value.trim(),
         lastName: document.getElementById('lastName').value.trim(),
         class: document.getElementById('class').value,
         phone: document.getElementById('phone').value.trim() || 'غير محدد',
-        pin: document.getElementById('pin').value.trim()
-    };
+        pin // ✅ هذا هو الصح
+        };
 
     try {
     const response = await fetch('https://long-mud-24f2.mmondeer346.workers.dev/register', {
