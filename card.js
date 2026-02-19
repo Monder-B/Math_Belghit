@@ -262,6 +262,9 @@
         // =====================
         // Events
         // =====================
+        // =====================
+        // Events
+        // =====================
         if (copyCodeBtn) {
         copyCodeBtn.addEventListener("click", async () => {
             try {
@@ -272,6 +275,7 @@
             }
         });
         }
+
         if (attendBtn) {
         attendBtn.addEventListener("click", async () => {
             try {
@@ -282,6 +286,7 @@
             }
 
             setAttendLoading(true);
+
             const { res, data } = await attendByCode(v);
 
             if (!res.ok || !data.ok) {
@@ -292,7 +297,7 @@
             // ✅ حدّث statsBox مباشرة
             showAttendMsg("ok", "✅ تم تسجيل الحصة بنجاح");
 
-            const statsBox = document.getElementById('statsBox');
+            const statsBox = document.getElementById("statsBox");
             if (statsBox) {
                 const sessionsText = String(data.sessionsInCycle ?? "—");
                 const lastText = formatLastAttendance(data.lastAttendanceAt || "");
@@ -306,8 +311,35 @@
                 `;
             }
 
-            // (اختياري) خزّن آخر رد في الكاش
-            // لو حبيت: نقدر نعاود نجلب /student باش تتزامن كل القيم
+            // ✅ الأهم: حدّث memoryCache + sessionStorage حتى ما يطيحش العدد بعد Refresh
+            try {
+                const cleanCode = String(currentStudentCode || "").trim();
+                if (cleanCode) {
+                // نجيب القديم من الكاش أو من sessionStorage
+                let old = memoryCache.get(cleanCode) || {};
+                if (!old || !old.ok) {
+                    const saved = sessionStorage.getItem(SESSION_KEY_PREFIX + cleanCode);
+                    if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && parsed.ok) old = parsed;
+                    }
+                }
+
+                const merged = {
+                    ...old,
+                    ok: true,
+                    studentCode: cleanCode,
+                    sessionsInCycle: data.sessionsInCycle,
+                    lastAttendanceAt: data.lastAttendanceAt,
+                    state: data.state,
+                    remainingToPay: data.remainingToPay,
+                    remainingToMax: data.remainingToMax
+                };
+
+                memoryCache.set(cleanCode, merged);
+                sessionStorage.setItem(SESSION_KEY_PREFIX + cleanCode, JSON.stringify(merged));
+                }
+            } catch {}
 
             } catch (e) {
             showAttendMsg("bad", "❌ تعذر الاتصال بالخادم");
