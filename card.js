@@ -185,30 +185,37 @@
         if (errorMessage) errorMessage.style.display = 'none';
         if (studentCard) studentCard.style.display = 'none';
 
-        // ✅ 1) عرض سريع من sessionStorage إن وجد (بدون ما نوقف طلب السيرفر)
+        let showedCached = false;
+
+        // ✅ 1) عرض سريع من sessionStorage (بدون ما نوقف طلب السيرفر)
         try {
             const saved = sessionStorage.getItem(SESSION_KEY_PREFIX + cleanCode);
             if (saved) {
             const parsed = JSON.parse(saved);
             if (parsed && parsed.ok) {
                 memoryCache.set(cleanCode, parsed);
-                displayStudentCard(parsed); // عرض سريع
+                displayStudentCard(parsed);
+                showedCached = true;
             }
             }
         } catch {}
 
-        // ✅ 2) إذا كان موجود في memoryCache (عرض سريع أيضا)
-        if (memoryCache.has(cleanCode)) {
+        // ✅ 2) عرض سريع من memoryCache (إذا موجود)
+        if (!showedCached && memoryCache.has(cleanCode)) {
             displayStudentCard(memoryCache.get(cleanCode));
+            showedCached = true;
         }
 
-        // ✅ 3) fetch من السيرفر (التحديث الحقيقي)
+        // ✅ 3) fetch من السيرفر (التحديث الحقيقي دائماً)
         try {
             const url = `${WORKER_BASE}/student?code=${encodeURIComponent(cleanCode)}`;
             const { res, data } = await fetchJsonWithTimeout(url, 9000);
 
+            // إذا فشل السيرفر وما عرضناش كاش -> نعرض الخطأ
             if (!res.ok) {
-            showError('خطأ من الخادم', data.error || `HTTP ${res.status}`);
+            if (!showedCached) {
+                showError('خطأ من الخادم', data.error || `HTTP ${res.status}`);
+            }
             return;
             }
 
@@ -219,19 +226,25 @@
                 sessionStorage.setItem(SESSION_KEY_PREFIX + cleanCode, JSON.stringify(data));
             } catch {}
 
-            // ✅ أهم سطر كان ناقص عندك:
+            // ✅ حدث الواجهة بأحدث بيانات
             displayStudentCard(data);
             return;
             }
 
+            // بيانات غير صحيحة
+            if (!showedCached) {
             showError('بيانات غير صحيحة', data.error || 'لم يتم العثور على الطالب بهذا الكود');
+            }
 
         } catch (error) {
             console.error('خطأ في جلب البيانات:', error);
+
+            if (!showedCached) {
             const msg = (String(error?.name) === "AbortError")
-            ? "انتهت مهلة الاتصال بالخادم. حاول مرة أخرى."
-            : "تعذر الاتصال بالخادم. تحقق من الإنترنت وحاول مرة أخرى.";
+                ? "انتهت مهلة الاتصال بالخادم. حاول مرة أخرى."
+                : "تعذر الاتصال بالخادم. تحقق من الإنترنت وحاول مرة أخرى.";
             showError('خطأ في الاتصال', msg);
+            }
         }
         }
 
